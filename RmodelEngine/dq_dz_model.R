@@ -284,9 +284,9 @@ parse_json_2_rules <- function(json){
   res
 }
 ruleFun <- function(json,ruleset=list()){
-  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming")
+  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl")
   rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
-                          "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit")
+                          "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
   tryCatch(
     { res <- parse_json_2_rules(json)
       society_id = is.null(res$moxieInfo$xuexinInfo) || !(ruleset[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
