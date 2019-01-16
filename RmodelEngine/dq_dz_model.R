@@ -235,7 +235,41 @@ ruleset$rule_yyx_zaiwang_state <- function(res){
   )
 }
 # txl
-
+ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # 亲属联系人
+      qinshu_dict <- c("爸","父","妈","母","爹","妹妹","姐姐","哥哥","弟弟","爷爷","奶奶","外公","外婆","姥姥","姥爷","老公","老婆","媳妇",
+                       "爱人","丈夫","舅","叔","婶","姑","表妹","表弟","表姐","表哥","宝贝","堂哥","堂姐",
+                       "堂妹","堂弟","儿子","女儿","姨","伯","乖乖","宝宝")
+      
+      
+      # 敏感联系人包含关键字 
+      black_dict <- c("套现","贷款","信用卡代办","中介","口子","借钱","黑户","贷","贷款","中介","黑户","白户","白条","信用卡","口子","分期",
+                      "金服","金融","财富","理财","融资","套现","提额","网贷","还款","还钱","借钱","借款","代还","pos机","催收","同行","抵押",
+                      "无抵押","高利贷","信用","二手车","垫养","呆账","欠款","欠钱","赌博")
+      
+      #-- configs start---
+      validate_limit = 20;
+      qingshu_limit = 1;
+      black_limit = 1
+      #-- configs end---
+      if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
+      txl <- res$tongxunluInfo
+      if(is.null(txl) || is.na(txl) || (txl == '')) return('TRUE')
+      
+      txl[,tel] <- txl[,tel] %>% str_remove_all("(\\s)|-|(\\+86)")
+      index = (nchar(txl[,tel]) == 11 & txl[,tel] %>% str_detect("^1")) & (txl$tel %>% duplicated() %>% `!`)  
+      txl = txl[index,]
+      validate_tels <- txl[,tel]
+      validate_num <- txl[,tel] %>% length()
+      qingshu_num <- txl[,name] %>% sapply(function(x) sapply(qinshu_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
+      black_num <- txl[,name] %>% sapply(function(x) sapply(black_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
+      (validate_num >= validate_limit & qingshu_num > qingshu_limit & black_num <= black_limit) %>% as.character() 
+    },
+    error = function(e) 'ERROR'
+  )
+}
 # rules config
 
 
