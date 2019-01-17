@@ -234,6 +234,25 @@ ruleset$rule_yyx_zaiwang_state <- function(res){
     error = function(e) 'ERROR'
   )
 }
+
+# yyx top calls in txl rule
+ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_num = 20,
+                                           intersect_limit = 0){
+  tryCatch(
+    {
+      txl = res$tongxunluInfo$tel %>% stringr::str_remove_all("(\\s)|-|(\\+86)")
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp %>% dplyr::filter(duration >= duration_limit, nchar(peer_number) == 11) %>% 
+        group_by(peer_number) %>% summarise(cnt = n()) %>% 
+        arrange(desc(cnt)) %>% head(top_num) %>% 
+        `$`(peer_number) %>% intersect(txl) %>% length() %>% 
+        `>`(intersect_limit) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+} 
+
 # txl
 ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
   tryCatch(
@@ -284,9 +303,9 @@ parse_json_2_rules <- function(json){
   res
 }
 ruleFun <- function(json,ruleset=list()){
-  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl")
+  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl","rule_yyx_call_last6m_topin_txl")
   rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
-                          "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
+                          "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl","rule_yyx_call_last6m_topin_txl")
   tryCatch(
     { res <- parse_json_2_rules(json)
       society_id = is.null(res$moxieInfo$xuexinInfo) || !(ruleset[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
