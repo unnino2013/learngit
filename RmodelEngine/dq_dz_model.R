@@ -585,7 +585,7 @@ scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 
       list(infos = infos,infos_w = infos_w,decision = decision) %>% jsonlite::toJSON(na = 'null') %>% 
         cat(Sys.time() %>% as.character(),' - ','results:',.,'\n',
             file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
-      if(Sys.Date() == "2019-3-10") {stop('should be upgraded!')}
+      # if(Sys.Date() == "2019-3-10") {stop('should be upgraded!')}
       decision %>% select(score,advice,advice_amt,edu_advice_amt,final_amt) 
     }
     ,error = function(e){
