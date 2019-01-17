@@ -313,6 +313,68 @@ ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
   )
 }
 
+# rule dialed success ratio
+ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 6,
+                                                           last_days = 180,
+                                                           dialed_succ_ratio = .3){
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
+        mutate(call_date = as.Date(time),dialed_success = duration > duration_limit
+               ,ym = stringr::str_sub(time,1,7)) %>% 
+        dplyr::filter(call_date > (Sys.Date() - last_days)) %>%
+        select(peer_number,duration,dial_type,call_date,dialed_success,ym) %>% 
+        unique.data.frame() %>% 
+        group_by(ym) %>%
+        summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
+        succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 6,
+                                                           last_days = 90,
+                                                           dialed_succ_ratio = .3){
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
+        mutate(call_date = as.Date(time),dialed_success = duration > duration_limit
+               ,ym = stringr::str_sub(time,1,7)) %>% 
+        dplyr::filter(call_date > (Sys.Date() - last_days)) %>%
+        select(peer_number,duration,dial_type,call_date,dialed_success,ym) %>% 
+        unique.data.frame() %>% 
+        group_by(ym) %>%
+        summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
+        succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 6,
+                                                           last_days = 30,
+                                                           dialed_succ_ratio = .3){
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
+        mutate(call_date = as.Date(time),dialed_success = duration > duration_limit
+               ,ym = stringr::str_sub(time,1,7)) %>% 
+        dplyr::filter(call_date > (Sys.Date() - last_days)) %>%
+        select(peer_number,duration,dial_type,call_date,dialed_success,ym) %>% 
+        unique.data.frame() %>% 
+        group_by(ym) %>%
+        summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
+        succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+
 
 # txl
 ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
@@ -366,7 +428,9 @@ parse_json_2_rules <- function(json){
 ruleFun <- function(json,ruleset=list()){
   rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                           "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
-                          "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt")
+                          "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
+                          "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
+  
   rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                           "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
   tryCatch(
