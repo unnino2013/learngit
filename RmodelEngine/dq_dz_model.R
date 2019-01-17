@@ -11,6 +11,7 @@ library(stringr)
 library(car) 
 library(magrittr)
 library(lubridate)
+library(hms)
 # x %>% car::recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA")
 
 check_num <- function(x){
