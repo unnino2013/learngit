@@ -1,4 +1,7 @@
-Git is a distributed version control system.
-Git is free software distributed under the GPL.
-Git has a mutable index called stage.
-Git tracks changes of files.
+This is a R model engine file,contains several components.
+API:rjava
+json parsing part.
+rules functions definition part.
+rules configed in ruleFun part.
+scoreFun part.
+sql for score part.
