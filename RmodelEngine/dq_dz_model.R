@@ -252,7 +252,22 @@ ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_nu
     error = function(e) 'ERROR'
   )
 } 
-
+# top n calls concentration.
+ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_num = 2,
+                                                     concentrate = 0.8){
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp %>% dplyr::filter(duration >= duration_limit, nchar(peer_number) == 11) %>% 
+        group_by(peer_number) %>% summarise(cnt = n()) %>% 
+        arrange(desc(cnt)) %>% mutate(ratio = cnt / sum(cnt)) %>% 
+        head(top_num) %$% sum(ratio) %>%
+        `<`(concentrate) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
 # txl
 ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
   tryCatch(
@@ -303,7 +318,8 @@ parse_json_2_rules <- function(json){
   res
 }
 ruleFun <- function(json,ruleset=list()){
-  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl","rule_yyx_call_last6m_topin_txl")
+  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+                          "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate")
   rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                           "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
   tryCatch(
