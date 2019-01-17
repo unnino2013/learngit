@@ -268,6 +268,52 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
     error = function(e) 'ERROR'
   )
 }
+
+# rule silent days
+ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
+                                                            limit_cnt = 2){
+  
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
+        diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
+        `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
+                                                            limit_cnt = 10){
+  
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
+        diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
+        `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
+                                                            limit_cnt = 20){
+  
+  tryCatch(
+    {
+      res$moxieInfo$yunyingshangInfo$calls$items %>% 
+        do.call('rbind',.) -> tmp
+      tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
+        diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
+        `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
+    },
+    error = function(e) 'ERROR'
+  )
+}
+
+
 # txl
 ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
   tryCatch(
@@ -319,7 +365,8 @@ parse_json_2_rules <- function(json){
 }
 ruleFun <- function(json,ruleset=list()){
   rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
-                          "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate")
+                          "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
+                          "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt")
   rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                           "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
   tryCatch(
