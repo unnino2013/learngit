@@ -586,7 +586,7 @@ scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 
         cat(Sys.time() %>% as.character(),' - ','results:',.,'\n',
             file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
       # if(Sys.Date() == "2019-3-10") {stop('should be upgraded!')}
-      decision %>% select(score,advice,advice_amt,edu_advice_amt,final_amt) 
+      decision %>% select(score,advice,advice_amt,edu_advice_amt,final_amt,rule_mingzhong_num,rule_mingzhong) 
     }
     ,error = function(e){
       data_frame(score = 0,advice =0,advice_amt=0,edu_advice_amt=0,final_amt=0) 
