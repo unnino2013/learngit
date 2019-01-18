@@ -395,7 +395,7 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
       #-- configs start---
       validate_limit = 20;
       qingshu_limit = 1;
-      black_limit = 1
+      black_limit = 20
       #-- configs end---
       if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
       txl <- res$tongxunluInfo
