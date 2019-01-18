@@ -272,7 +272,7 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
 
 # rule silent days
 ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
-                                                            limit_cnt = 2){
+                                                            limit_cnt = 5){
   
   tryCatch(
     {
