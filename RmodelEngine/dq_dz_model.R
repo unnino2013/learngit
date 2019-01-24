@@ -440,10 +440,12 @@ ruleFun <- function(json,ruleset=list()){
       rt = list()
       if(society_id){
         for(x in rule_society_state){
+          if(class(ruleset[[x]]) != "function") next
           rt[[x]] <- ruleset[[x]](res)
         }
       }else{
         for(x in rule_student_state){
+          if(class(ruleset[[x]]) != "function") next
           rt[[x]] <- ruleset[[x]](res)
         }
       }
