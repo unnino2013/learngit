@@ -8,11 +8,11 @@ library(RSQLite)
 library(DBI)
 library(jsonlite)
 library(stringr)
-library(car) 
+# library(car) 
 library(magrittr)
 library(lubridate)
 library(hms)
-# x %>% car::recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA")
+# x %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA")
 
 check_num <- function(x){
   x <- as.numeric(x)
@@ -73,7 +73,7 @@ ruleset$rule_zmscore <- function(res){
       # zhifubaomianya & taobao scpyder jianrong
       zm_zmscore = res$baseInfo$zmscore %>% check_char()
       taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
-      taobao_zmscore_grade = taobao_zmscore %>% car::recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
+      taobao_zmscore_grade = taobao_zmscore %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
       zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
       if(check_null_NA(zmscore)) return('ERROR')
       zmscore %in% c('Z1','Z2','Z3','Z4')  %>% as.character()
@@ -138,9 +138,9 @@ ruleset$rule_xuexin_xueli_limit <- function(res){
       edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
       edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
       edu_status_check <- function(edu_status) edu_status  %in% c('在籍注册学籍','在籍保留学籍') %>% sum(na.rm = TRUE)
-      # edu_advice_amt_check <- function(edu_level) edu_level %>% car::recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
+      # edu_advice_amt_check <- function(edu_level) edu_level %>% car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
       # edu_level_max_level_check <- function(edu_level) edu_level %>% 
-      #   car::recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
+      #   car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
       # 
       edu_level = res$moxieInfo$xuexinInfo$studentInfo_list$level  %>% edu_level_check() %>% check_num()  # %in% c('专科','本科','硕士研究生','博士研究生') # 注意多学历无序列表
       edu_type = res$moxieInfo$xuexinInfo$studentInfo_list$edu_type  %>% edu_type_chenck() %>% check_num()  # %in% c('普通','研究生','普通高等教育')
@@ -162,7 +162,7 @@ ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1)
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time) || 
          is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) return('ERROR')
       edu_level_max_level_check <- function(edu_level) {edu_level %>%
-        car::recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)}
+        car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)}
       edu_level_num <- res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_level_max_level_check() %>% check_NA() # xueli
 
       edu_leave_school_time <- res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time %>% check_date() %>% check_NA()
@@ -464,8 +464,8 @@ edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕�
 edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
 edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
 edu_status_check <- function(edu_status) edu_status  %in% c('在籍注册学籍','在籍保留学籍') %>% sum(na.rm = TRUE)
-edu_advice_amt_check <- function(edu_level) edu_level %>% car::recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
-edu_level_max_level_check <- function(edu_level) edu_level %>% car::recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
+edu_advice_amt_check <- function(edu_level) edu_level %>% car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
+edu_level_max_level_check <- function(edu_level) edu_level %>% car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
 
 parse_json_2_scores <- function(json){
   if(jsonlite::validate(json)) {
@@ -502,7 +502,7 @@ parse_json_2_scores <- function(json){
     huai_bei_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num(),
     huai_bei_can_use_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% check_num(),
     # zhifubaomianya & taobao scpyder jianrong
-    taobao_zmscore_grade = taobao_zmscore %>% car::recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char(),
+    taobao_zmscore_grade = taobao_zmscore %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char(),
     zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore),
     
     # taobao basic_info
@@ -551,7 +551,7 @@ scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 
           if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$level)) return(0)
           # compute amt
           edu_advice_amt_check <- function(edu_level) {edu_level %>% 
-              car::recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)}
+              car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)}
           amt = res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_advice_amt_check() %>% check_num()
           amt
           },
@@ -561,9 +561,9 @@ scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 
       decision$edu_advice_amt <- edu_advice_amt_f(json)
       # compute final_amt
       final_amt_check <- function(advice_amt,edu_advice_amt,edu_student_status,max_loan_limit){ 
-        advice_amt <- advice_amt %>% car::recode("NA = 0")
-        edu_advice_amt <- edu_advice_amt %>% car::recode("NA = 0") 
-        edu_student_status <- edu_student_status %>% car::recode("NA = 0")
+        advice_amt <- advice_amt %>% car_recode("NA = 0")
+        edu_advice_amt <- edu_advice_amt %>% car_recode("NA = 0") 
+        edu_student_status <- edu_student_status %>% car_recode("NA = 0")
         ifelse(edu_student_status,edu_advice_amt,advice_amt) %>% min(max_loan_limit,na.rm = T)
       }
       decision$advice_amt <- round(decision$advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
@@ -834,3 +834,86 @@ from
   
 
 
+# self-defined function
+car_recode <-
+  function (var, recodes, as.factor, as.numeric = TRUE, levels) 
+  {
+    squeezeBlanks <- function (text) 
+    {
+      gsub(" *", "", text)
+    }
+    lo <- -Inf
+    hi <- Inf
+    recodes <- gsub("\n|\t", " ", recodes)
+    recode.list <- rev(strsplit(recodes, ";")[[1]])
+    is.fac <- is.factor(var)
+    if (missing(as.factor)) 
+      as.factor <- is.fac
+    if (is.fac) 
+      var <- as.character(var)
+    result <- var
+    for (term in recode.list) {
+      if (0 < length(grep(":", term))) {
+        range <- strsplit(strsplit(term, "=")[[1]][1], ":")
+        low <- try(eval(parse(text = range[[1]][1])), silent = TRUE)
+        if (class(low) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               low)
+        }
+        high <- try(eval(parse(text = range[[1]][2])), silent = TRUE)
+        if (class(high) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               high)
+        }
+        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                      silent = TRUE)
+        if (class(target) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               target)
+        }
+        result[(var >= low) & (var <= high)] <- target
+      }
+      else if (0 < length(grep("^else=", squeezeBlanks(term)))) {
+        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                      silent = TRUE)
+        if (class(target) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               target)
+        }
+        result[1:length(var)] <- target
+      }
+      else {
+        set <- try(eval(parse(text = strsplit(term, "=")[[1]][1])), 
+                   silent = TRUE)
+        if (class(set) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               set)
+        }
+        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                      silent = TRUE)
+        if (class(target) == "try-error") {
+          stop("\n  in recode term: ", term, "\n  message: ", 
+               target)
+        }
+        for (val in set) {
+          if (is.na(val)) 
+            result[is.na(var)] <- target
+          else result[var == val] <- target
+        }
+      }
+    }
+    if (as.factor) {
+      result <- if (!missing(levels)) 
+        factor(result, levels = levels)
+      else as.factor(result)
+    }
+    else if (as.numeric && (!is.numeric(result))) {
+      result.valid <- na.omit(result)
+      opt <- options(warn = -1)
+      result.valid <- as.numeric(result.valid)
+      options(opt)
+      if (!any(is.na(result.valid))) 
+        result <- as.numeric(result)
+    }
+    result
+  }
