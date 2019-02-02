@@ -12,6 +12,7 @@ library(stringr)
 library(magrittr)
 library(lubridate)
 library(hms)
+library(futile.logger)
 # x %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA")
 
 check_num <- function(x){
@@ -40,30 +41,42 @@ ruleset$rule_age <- function(res=list(),age_limit = c(18,45)){
       require(magrittr)
       require(stringr)
       age <- res$baseInfo$id_card %>% str_sub(7,14) %>% as.Date.character(.,format = "%Y%m%d") %>% `-`(Sys.Date(),.) %>% `/`(ddays(365))
-      if(check_null_NA(age)) return('ERROR')
+      if(check_null_NA(age)) stop('ERROR:res$baseInfo$id_card computed age is null.')
       age_limit <- sort(age_limit)
       between(age,age_limit[1],age_limit[2]) %>% as.character()},
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_sanyaosu <- function(res){
   tryCatch(
     {
       sanyaoshu <- res$baseInfo$san %>% as.character() %>% str_to_upper()
-      if(check_null_NA(sanyaoshu)) return('ERROR')
+      if(check_null_NA(sanyaoshu)) stop('ERROR:sanyaoshu is null.')
       sanyaoshu %in% c('1','TRUE') %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_zaiwang <- function(res){
   tryCatch(
     {
       zaiwang <- res$baseInfo$zaiwang %>% as.character() %>% str_to_upper()
-      if(check_null_NA(zaiwang)) return('ERROR')
+      if(check_null_NA(zaiwang)) stop('ERROR:zaiwang is null or NA.')
       zaiwang %in% c('2','3','4')  %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 # taobao
@@ -78,19 +91,27 @@ ruleset$rule_zmscore <- function(res){
       if(check_null_NA(zmscore)) return('ERROR')
       zmscore %in% c('Z1','Z2','Z3','Z4')  %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_taobao_his_days <- function(res,taobao_his_days_limit = 90){
   tryCatch(
     {
-      if(is.null(res$moxieInfo$taobaoReport)) return('ERROR')
+      if(is.null(res$moxieInfo$taobaoReport)) stop('ERROR:res$moxieInfo$taobaoReport is null.')
       taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_NA()
       taobao_his_days <- taobao_first_ordertime %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
-      if(is.null(taobao_his_days) || is.na(taobao_his_days)) return('ERROR')
+      if(is.null(taobao_his_days) || is.na(taobao_his_days)) stop('ERROR:taobao_his_days is null.')
       (taobao_his_days > taobao_his_days_limit) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_taobao_shiming <- function(res){
@@ -113,9 +134,9 @@ ruleset$rule_taobao_shiming <- function(res){
   }
   tryCatch(
     {
-      if(is.null(res$baseInfo$san)) return('ERROR')
-      if(is.null(res$moxieInfo$taobaoInfo$userinfo$real_name)) return('ERROR')
-      if(is.null(res$moxieInfo$taobaoInfo$userinfo$phone_number)) return('ERROR')
+      if(is.null(res$baseInfo$san)) stop('ERROR:res$baseInfo$san is null.')
+      if(is.null(res$moxieInfo$taobaoInfo$userinfo$real_name)) stop('ERROR:res$moxieInfo$taobaoInfo$userinfo$real_name is null.')
+      if(is.null(res$moxieInfo$taobaoInfo$userinfo$phone_number)) stop('ERROR:res$moxieInfo$taobaoInfo$userinfo$phone_number is null.')
       sanyaoshu <- res$baseInfo$san
       tel <- res$baseInfo$tel
       taobao_namelist = res$moxieInfo$taobaoInfo$deliveraddress$name %>% c(res$moxieInfo$taobaoInfo$userinfo$real_name) %>% unique() %>% check_NA()
@@ -124,16 +145,20 @@ ruleset$rule_taobao_shiming <- function(res){
       tel_check_status = tel_check(tel,taobao_tellist) %>% check_NA()
       shiming_grade_check(sanyaoshu,tel_check_status,name_check_status)
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 # xuexin
 ruleset$rule_xuexin_xueli_limit <- function(res){
   tryCatch(
     {
-      if(is.null(res$moxieInfo$xuexinInfo)) return('ERROR')
-      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) return('ERROR')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) return('FALSE') 
+      if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
+      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
+      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('ERROR:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card') 
       edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
       edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
       edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
@@ -150,21 +175,26 @@ ruleset$rule_xuexin_xueli_limit <- function(res){
       edu_student_status = (edu_level & edu_type & edu_form & edu_status) %>% as.character()
       edu_student_status
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1){
   tryCatch(
     {
-      if(is.null(res$moxieInfo$xuexinInfo)) return('ERROR')
-      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) return('ERROR')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) return('FALSE') 
+      if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
+      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
+      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('error:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card.') 
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time) || 
-         is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) return('ERROR')
+         is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) stop('ERROR:res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time or res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time is null.')
+      
       edu_level_max_level_check <- function(edu_level) {edu_level %>%
-        car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)}
+          car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)}
       edu_level_num <- res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_level_max_level_check() %>% check_NA() # xueli
-
+      
       edu_leave_school_time <- res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time %>% check_date() %>% check_NA()
       edu_enrollment_time  <-  res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time %>% check_date() %>% check_NA()
       edu_grade <- Sys.Date() %>% check_date() %>% `-`(edu_enrollment_time) %>% `/`(ddays(365)) %>% ceiling() # 1234year # nianji 12345678
@@ -175,25 +205,33 @@ ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1)
         (edu_level_num > 2) # master above no limit
       rt %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_xuexin_xuezhi_limit <- function(res){
   tryCatch(
     {
-      if(is.null(res$moxieInfo$xuexinInfo)) return('ERROR')
-      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) return('ERROR')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) return('FALSE') 
+      if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
+      if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
+      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('error:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card.') 
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time) || 
-         is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) return('ERROR')
-
+         is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) stop('ERROR:res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time or res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time is null.')
+      
       edu_leave_school_time <- res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time %>% check_date() %>% check_NA()
       edu_enrollment_time  <-  res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time %>% check_date() %>% check_NA()
       edu_xuezhi <- edu_leave_school_time %>% check_date() %>% `-`(edu_enrollment_time) %>% `/`(ddays(365)) %>% ceiling() # xuezhi 1234
-     
+      
       (edu_xuezhi >= 3)  %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 
@@ -201,28 +239,36 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
 ruleset$rule_yyx_shiming <- function(res){
   tryCatch(
     {
-      if(is.null(res$baseInfo$san)) return('ERROR')
-      if(is.null(res$moxieInfo$yunyingshangInfo)) return('ERROR')
-      if(is.null(res$moxieInfo$yunyingshangInfo$name)) return('ERROR')
-      if(length(res$baseInfo$realname) != length(res$moxieInfo$yunyingshangInfo$name)) return('ERROR')
+      if(is.null(res$baseInfo$san)) stop('ERROR:res$baseInfo$san is null.')
+      if(is.null(res$moxieInfo$yunyingshangInfo)) stop('ERROR:res$moxieInfo$yunyingshangInfo is null')
+      if(is.null(res$moxieInfo$yunyingshangInfo$name)) stop('ERROR:res$moxieInfo$yunyingshangInfo$name is null')
+      if(length(res$baseInfo$realname) != length(res$moxieInfo$yunyingshangInfo$name)) stop('ERROR:res$baseInfo$realname != res$moxieInfo$yunyingshangInfo$name.')
       realname  <- res$baseInfo$realname %>% str_split(pattern = '') %>% unlist()
       yys_sm <- res$moxieInfo$yunyingshangInfo$name %>% str_split(pattern = '') %>% unlist() %>% `==`(realname) %>% any()
       res$baseInfo$san %>% str_to_lower() %>% `%in%`(c('1','true')) %>% `||`(yys_sm)
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_his <- function(res,yys_his_days_limit = 180){
   tryCatch(
     {
-      if(is.null(res$moxieInfo$yunyingshangInfo)) return('ERROR')
-      if(is.null(res$moxieInfo$yunyingshangInfo$open_time)) return('ERROR')
+      if(is.null(res$moxieInfo$yunyingshangInfo)) stop('ERROR:res$moxieInfo$yunyingshangInfo is null.')
+      if(is.null(res$moxieInfo$yunyingshangInfo$open_time)) stop('ERROR:res$moxieInfo$yunyingshangInfo$open_time is null.')
       open_time <- res$moxieInfo$yunyingshangInfo$open_time
       yys_his_days <- open_time %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
-      if(is.null(yys_his_days) || is.na(yys_his_days)) return('ERROR')
+      if(is.null(yys_his_days) || is.na(yys_his_days)) stop('ERROR:yys_his_days is null or NA.')
       (open_time > yys_his_days_limit) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_zaiwang_state <- function(res){
@@ -232,13 +278,17 @@ ruleset$rule_yyx_zaiwang_state <- function(res){
       if(is.null(res$moxieInfo$yunyingshangInfo$message) && is.null(res$moxieInfo$yunyingshangInfo$state)) return('ERROR')
       c(res$moxieInfo$yunyingshangInfo$message,res$moxieInfo$yunyingshangInfo$state) %>% `==`("正常") %>% any() %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 
 # yyx top calls in txl rule
 ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_num = 20,
-                                           intersect_limit = 0){
+                                                   intersect_limit = 0){
   tryCatch(
     {
       txl = res$tongxunluInfo$tel %>% stringr::str_remove_all("(\\s)|-|(\\+86)")
@@ -250,7 +300,11 @@ ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_nu
         `$`(peer_number) %>% intersect(txl) %>% length() %>% 
         `>`(intersect_limit) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 } 
 # top n calls concentration.
@@ -266,7 +320,11 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
         head(top_num) %$% sum(ratio) %>%
         `<`(concentrate) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 
@@ -282,7 +340,11 @@ ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
         diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
         `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
@@ -296,7 +358,11 @@ ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
         diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
         `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
@@ -310,7 +376,11 @@ ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
         diff.POSIXt(lag = 1) %>% `/`(lubridate::dseconds(3600 * 24)) %>%
         `>`(silent_days) %>% sum(na.rm = T) %>% `<`(limit_cnt) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 
@@ -332,7 +402,11 @@ ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 
         summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
         succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 6,
@@ -352,7 +426,11 @@ ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 
         summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
         succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 6,
@@ -372,7 +450,11 @@ ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 
         summarise(success = sum(dialed_success,na.rm = T),all_dialed = n(),succ_rate = success / all_dialed) %$%
         succ_rate %>% mean(na.rm = T) %>% `>`(dialed_succ_ratio) %>% as.character()
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 
@@ -397,9 +479,9 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
       qingshu_limit = 1;
       black_limit = 20
       #-- configs end---
-      if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
+      # if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
       txl <- res$tongxunluInfo
-      if(is.null(txl) || is.na(txl) || (txl == '')) return('TRUE')
+      # if(is.null(txl) || is.na(txl) || (txl == '')) return('TRUE')
       
       txl[,tel] <- txl[,tel] %>% str_remove_all("(\\s)|-|(\\+86)")
       index = (nchar(txl[,tel]) == 11 & txl[,tel] %>% str_detect("^1")) & (txl$tel %>% duplicated() %>% `!`)  
@@ -410,71 +492,29 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
       black_num <- txl[,name] %>% sapply(function(x) sapply(black_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
       (validate_num >= validate_limit & qingshu_num > qingshu_limit & black_num <= black_limit) %>% as.character() 
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 # rules config
-
-
-parse_json_2_rules <- function(json){
-  if(jsonlite::validate(json)) {
-    res = jsonlite::fromJSON(json)
-  }else{
-    cat(Sys.time() %>% as.character(),' - ','paras:',json,'\n',
-        file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
-    res = NULL
-  }
-  res
-}
-ruleFun <- function(json,ruleset=list()){
-  rule_society_state <- c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
-                          "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
-                          "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
-                          "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
-  
-  rule_student_state <- c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
-                          "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
-  tryCatch(
-    { res <- parse_json_2_rules(json)
-      society_id = is.null(res$moxieInfo$xuexinInfo) || !(ruleset[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
-      rt = list()
-      if(society_id){
-        for(x in rule_society_state){
-          if(class(ruleset[[x]]) != "function") next
-          rt[[x]] <- ruleset[[x]](res)
-        }
-      }else{
-        for(x in rule_student_state){
-          if(class(ruleset[[x]]) != "function") next
-          rt[[x]] <- ruleset[[x]](res)
-        }
-      }
-      rt %>% jsonlite::toJSON(na='null') %>% 
-        cat(Sys.time() %>% as.character(),'rules:',res$baseInfo$realname,res$baseInfo$id_card,society_id,.,'\n',sep = ' - ',
-                                                 file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
-      mingzhong <- !(rt %in% 'TRUE')
-      rt[mingzhong] %>% names() 
-    }
-    ,error = function(e) NULL
-  )
-}
- 
 
 edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
 edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
 edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
 edu_status_check <- function(edu_status) edu_status  %in% c('在籍注册学籍','在籍保留学籍') %>% sum(na.rm = TRUE)
-edu_advice_amt_check <- function(edu_level) edu_level %>% car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
+# edu_advice_amt_check <- function(edu_level) edu_level %>% car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)
 edu_level_max_level_check <- function(edu_level) edu_level %>% car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
 
-parse_json_2_scores <- function(json){
+
+
+
+parse_json_2_score_features <- function(json){
   if(jsonlite::validate(json)) {
-    cat(Sys.time() %>% as.character(),' - ','success!:paras:',json,'\n',
-        file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
     res = jsonlite::fromJSON(json)
   }else{
-    cat(Sys.time() %>% as.character(),' - ','faied!:paras:',json,'\n',
-        file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
     res = NULL
   }
   infos <- data_frame(
@@ -510,92 +550,567 @@ parse_json_2_scores <- function(json){
     first_ordertime = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime  %>% check_char(),
     account_auth = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$account_auth  %>% check_char(),
     taobao_vip_level = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_level  %>% check_char(),
-    taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char(),
-    
+    taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char()
     # check socitety
   )
   infos 
 }
-
-scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 600,max_loan_limit = 10000,rules_check_set = ruleset){
-  decision <- 
-    tryCatch({
-      infos <- parse_json_2_scores(json)
-      cat(Sys.time() %>% as.character(),' - ','paras:',infos %>% jsonlite::toJSON(na='null'),'\n',
-          file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
-      library(DBI)
-      con <- dbConnect(RSQLite::SQLite(), ":memory:")
-      RSQLite::dbWriteTable(con, "infos", infos,overwrite = TRUE)
-      rs <- DBI::dbSendQuery(con,str_sql)
-      infos_w <- dbFetch(rs)
-      DBI::dbClearResult(rs)
-      DBI::dbDisconnect(con);
-      # compute society amt
-      str_amt = sprintf(str_amt,score_threshold)
-      con <- dbConnect(RSQLite::SQLite(), ":memory:")
-      RSQLite::dbWriteTable(con, "infos_w", infos_w,overwrite = TRUE)
-      rs <- DBI::dbSendQuery(con,str_amt)
-      decision <- dbFetch(rs)
-      DBI::dbClearResult(rs)
-      DBI::dbDisconnect(con);
+scoreFun_base  = function(json){
+  #----str_sql-----
+  str_sql = "
+  /******case******/
+  /** 
+  infos = 
+  **/
+  
+  select 
+  --#------------------scorescale2sql----------------------#
+  383.903595255632  +  72.1347520444482  * log(score_p / (1-score_p))  as score,
+  *  
+  from 
+  ( select 
+  1/(1 + exp(-1 * (1 * 1.57124794845992 + zaiwang * 0.998620195318036 + 
+  sex * 0.708322586241409 + age * 0.945319075870239 + zmscore * 
+  0.920134447328887 + query_sum_count * 0.774599560824178 + loans_cash_count * 
+  0.0032585981654242 + history_fail_fee * 0.295654539546532)))  as score_p,
+  *  
+  from 
+  ( select 
+  /****** zaiwang ******/
+  case 
+  when zaiwang in ( '1' ) then -1.90791154596408  
+  when zaiwang in ( '3' ) then 0.264145159665213 
+  when zaiwang in ( '4' ) then 0.556686098339944 
+  when zaiwang in ( '2' ) then -1.25732397982293 
+  when zaiwang in ( '' ) then -1.90791154596408  --2.89396786284092 adjust 1.90791154596408
+  else  -0.09999  end as 
+  zaiwang ,
+  /******************************/
+  /****** sex ******/
+  case 
+  when sex in ( 'female' ) then 0.813148891874145 
+  when sex in ( 'male' ) then -0.172317343210599  
+  else  -0.09999  end as 
+  sex ,
+  /******************************/
+  /****** age ******/
+  case 
+  when  age <=23 then 1.30280609120266 
+  when 23 < age  then -0.334857665904626  
+  else  -0.09999  end as 
+  age ,
+  /******************************/
+  /****** zmscore ******/
+  case 
+  when zmscore in ( 'Z1' ) then 5.93072313092869 
+  when zmscore in ( 'Z2' ) then 2.91513836166312 
+  when zmscore in ( 'Z3' ) then 1.06014972566487 
+  when zmscore in ( 'Z4' ) then 0.413249932602901 
+  when zmscore in ( 'Z5' ) then -2.76878148389683  
+  else  -0.09999  end as 
+  zmscore ,
+  /******************************/
+  /****** query_sum_count ******/
+  case 
+  when  query_sum_count IS NULL then 1.37898231642044 
+  when  query_sum_count <=2 then 1.49951638544871 
+  when 2 < query_sum_count and query_sum_count <=4 then 1.27339220599636 
+  when 4 < query_sum_count and query_sum_count <=8 then -0.500460984876878 
+  when 8 < query_sum_count and query_sum_count <=21 then -1.04601488615572 
+  when 21 < query_sum_count  then -1.72325428368103  
+  else  -0.09999  end as 
+  query_sum_count ,
+  /******************************/
+  /****** loans_cash_count ******/
+  case 
+  when  loans_cash_count IS NULL then 0.512129731890826 
+  when  loans_cash_count <=0 then 0.595060111221559 
+  when 0 < loans_cash_count and loans_cash_count <=1 then 0.172645444799622 
+  when 1 < loans_cash_count and loans_cash_count <=5 then -1.15934357146273 
+  when 5 < loans_cash_count  then -2.32776539152434  
+  else  -0.09999  end as 
+  loans_cash_count ,
+  /******************************/
+  /****** history_fail_fee ******/
+  case 
+  when  history_fail_fee IS NULL then 0.512129731890826 
+  when  history_fail_fee <=0 then 1.39943292689173 
+  when 0 < history_fail_fee and history_fail_fee <=1 then -0.0980870693383861 
+  when 1 < history_fail_fee and history_fail_fee <=3 then -0.328610727950218 
+  when 3 < history_fail_fee and history_fail_fee <=12 then -1.35576405263618 
+  when 12 < history_fail_fee  then -1.90168099621344  
+  else  -0.09999  end as 
+  history_fail_fee  
+  from  infos --you should modify the table name. 
+  )a 
+  )b"
+#-------------
+  tryCatch({
+    infos <- parse_json_2_score_features(json)
+    library(DBI);library(RSQLite)
+    con <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::dbWriteTable(con, "infos", infos,overwrite = TRUE)
+    rs <- DBI::dbSendQuery(con,str_sql)
+    infos_w <- dbFetch(rs)
+    DBI::dbClearResult(rs)
+    DBI::dbDisconnect(con);
+    
+    # score process
+    score <- round(infos_w$score) + round(mod(infos$age,10) / 3) # rnd
+    infos$score_p <- infos_w$score_p
+    infos$score <- infos_w$score
+    infos$score_adj <- score
+    score
+  }
+  ,error = function(e){
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    score = 0L 
+    score
+  })
+}
+scoreFun_custom <- function(json){
+  tryCatch(
+    {
+      # score functions
+      scoreFun_rent_app_edu <- scoreFun_base
+      scoreFun_rent_app_soc <- scoreFun_base
+      scoreFun_rent_alipay <- scoreFun_base
+      scoreFun_cashloan <- scoreFun_base
       
-      # compute society 
       res <- jsonlite::fromJSON(json)
-      society_id = is.null(res$moxieInfo$xuexinInfo) || !(rules_check_set[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
+      # compute alipay id
+      zm_code <- paste('Z',1:5,sep='')
+      alipay_id <- res$baseInfo$zmscore %in% zm_code
+      # compute edu & society id
+      society_id = is.null(res$moxieInfo$xuexinInfo) || !(ruleset[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
       student_id = !society_id
-      decision$student_id = student_id
-      # compute edu amt
-      edu_advice_amt_f <- function(json) {
-        tryCatch(
-          { res <- jsonlite::fromJSON(json)
-          if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$level)) return(0)
-          # compute amt
-          edu_advice_amt_check <- function(edu_level) {edu_level %>% 
-              car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)}
-          amt = res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_advice_amt_check() %>% check_num()
-          amt
-          },
-          error = function(e) 0
-        )
+      # compute cashloan id
+      cashloan_id_fun <- function(x){
+        if(length(x)){
+          x %>% stringr::str_to_upper() %in% c("1","TRUE","True")
+        }else FALSE
       }
-      decision$edu_advice_amt <- edu_advice_amt_f(json)
-      # compute final_amt
-      final_amt_check <- function(advice_amt,edu_advice_amt,edu_student_status,max_loan_limit){ 
-        advice_amt <- advice_amt %>% car_recode("NA = 0")
-        edu_advice_amt <- edu_advice_amt %>% car_recode("NA = 0") 
-        edu_student_status <- edu_student_status %>% car_recode("NA = 0")
-        ifelse(edu_student_status,edu_advice_amt,advice_amt) %>% min(max_loan_limit,na.rm = T)
+      cashloan_id <- res$baseInfo$cashloan_id  %>% cashloan_id_fun()
+      #---SCORE & RULE COMPUTE BEGIN ---#
+      if(cashloan_id){
+        #--- cashloan---#
+        # score <- scoreFun_cashloan(json)
+        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
+        decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
+        
+      }else if(alipay_id) {
+        #--- rent-alipay---#
+        # score <- scoreFun_rent_alipay(json)
+        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
+        decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
+      }else if(student_id){
+        #--- rent edu---#
+        # score <- scoreFun_rent_app_edu(json)
+        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
+        decision <- amtFun_rent_app_edu(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 8000)
+      }else {
+        #--- rent society---#
+        # score <- scoreFun_rent_app_soc(json)
+        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_soc"))
+        decision <- amtFun_rent_app_soc(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
       }
-      decision$advice_amt <- round(decision$advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
-      decision$edu_advice_amt <- round(decision$edu_advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
-      decision$final_amt <- final_amt_check(decision$advice_amt,decision$edu_advice_amt,student_id,max_loan_limit)
+      #---SCORE & RULE COMPUTE END ---#
+      
+      #---SUMMARIZE SCORE&RULE BEGIN ---#
+      rule_mingzhong_num <- rule_mingzhong %>% length() 
+      decision$score_ori <- decision$score
+      if(rule_mingzhong_num > 0) {
+        decision$score <- 110
+        decision$advice <- 0
+      }
+      decision$rule_mingzhong_num <- rule_mingzhong_num
+      decision$rule_mingzhong <- rule_mingzhong %>% jsonlite::toJSON(na='null')
+      #---SUMMARIZE SCORE&RULE END ---#
+      # decision$rule_mingzhong <- rule_mingzhong %>% jsonlite::toJSON(na = 'null')
+      list(decision = decision)
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+      list(decision = decision)
+    }
+  )
+}
 
-      
-      
-      decision$score_float <- decision$score
-      decision$score <- round(decision$score) + round(mod(infos$age,10) / 3) # rnd
-      
-      # compute rules
-      rule_mingzhong <- ruleFun(json,rules_check_set)
-      decision$rule_mingzhong_num <- rule_mingzhong %>% length() 
-      decision$rule_mingzhong <- rule_mingzhong %>% jsonlite::toJSON(na = 'null')
+scoreFun = function(json,str_sql =NULL,str_amt=NULL){
+  # str_sql str_amt nouse paras,jianrong last version.
+  tryCatch({
+    # log
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',json)
+    
+    if(jsonlite::validate(json)){
+      rt <- scoreFun_custom(json) 
+      decision <- rt$decision
+      res <- jsonlite::fromJSON(json);# print log
+    }else{
+      decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    }
+    
+    # log
+    cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',cust_info)
+    
+    decision %>% jsonlite::toJSON(na = 'null')
+  }
+  ,error = function(e){
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    decision %>% jsonlite::toJSON(na = 'null')
+  })
+}
 
-      decision$score = ifelse(decision$rule_mingzhong_num,110,decision$score) # rules rescore
-      decision$advice = (decision$score >= score_threshold) %>% as.numeric()
-      
-      
-      list(infos = infos,infos_w = infos_w,decision = decision) %>% jsonlite::toJSON(na = 'null') %>% 
-        cat(Sys.time() %>% as.character(),' - ','results:',.,'\n',
-            file=paste('modellog',Sys.Date(),'.log',sep=""),append = TRUE)
-      # if(Sys.Date() == "2019-3-10") {stop('should be upgraded!')}
-      decision %>% select(score,advice,advice_amt,edu_advice_amt,final_amt,rule_mingzhong_num,rule_mingzhong) 
+
+ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
+  # rules_config <- c("rule_age","rule_zaiwang","rule_zmscore",)
+  tryCatch(
+    { ruleset <- ruleset
+    res = jsonlite::fromJSON(json)
+    rt = list()
+    for(x in rules_config){
+      if(class(ruleset[[x]]) != "function") next
+      rt[[x]] <- ruleset[[x]](res)
+    }
+    
+    mingzhong <- !(rt %in% 'TRUE')
+    rt[mingzhong] %>% names() 
     }
     ,error = function(e){
-      data_frame(score = 0,advice =0,advice_amt=0,edu_advice_amt=0,final_amt=0) 
-    })
-  decision %>% mutate(score = score %>% {function(x)ifelse(is.na(x) || is.null(x),0,x)}() %>% as.numeric(),
-                      advice = advice %>% {function(x)ifelse(is.na(x) || is.null(x),0,x)}() %>% as.numeric()
-                      ) %>% jsonlite::toJSON(na = 'null')
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      NULL
+    }
+  )
+}
+ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","cashloan")){
+  tryCatch(
+    {
+      rule_rent_app_student_state <-  c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
+                                        "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
+      
+      rule_rent_app_society_state <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+                                        "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
+                                        "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
+                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
+      
+      rule_rent_alipay            <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
+      
+      rule_cashloan               <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+                                        "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
+                                        "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
+                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
+      
+      # ruleFun_list = ruleset$ruleFun_list
+      if(product_type == "rent_app_edu"){
+        ruleFun_base(json,rules_config = rule_rent_app_student_state,ruleset) -> rt
+      }else if(product_type == "rent_app_soc"){
+        ruleFun_base(json,rules_config = rule_rent_app_society_state,ruleset) -> rt
+      }else if(product_type == "rent_alipay"){
+        ruleFun_base(json,rules_config = rule_rent_alipay,ruleset) -> rt
+      }else if(product_type == "cashloan"){
+        ruleFun_base(json,rules_config = rule_cashloan,ruleset) -> rt
+      }else{
+        NULL -> rt
+      }
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+      NULL
+    }
+  )
+  rt
+}
+
+# define score functions
+scoreFun_rent_app_edu <- scoreFun_base
+scoreFun_rent_app_soc <- scoreFun_base
+scoreFun_rent_alipay <- scoreFun_base
+scoreFun_cashloan <- scoreFun_base
+
+amtFun_rent_app_soc = function(json,loan_amt_ratio = 1.0,score_threshold = 600,max_loan_limit = 10000){
+  tryCatch({
+    infos <- parse_json_2_score_features(json)
+    score <- scoreFun_rent_app_soc(json)
+    score_df <- data.frame(score = score)
+    #--------str_amt---------------------------
+    str_amt = "
+    select 
+    case 
+    when score > %s then 1 else 0 
+    end as advice
+    ,
+    case
+    when	score	<=400	then	1000
+    when	score	<=500	then	2000
+    when	score	<=550	then	2500
+    when	score	<=575	then	3000
+    when	score	<=600	then	3500
+    when	score	<=625	then	4000
+    when	score	<=650	then	4500
+    when	score	<=675	then	4800
+    when	score	<=700	then	5000
+    when	score	<=750	then	6000
+    when	score	<=800	then	6500
+    when	score	<=850	then	7000
+    when	score	<=900	then	8000
+    when	score	>900	then	9000
+    else	0			
+    end as	advice_amt			
+    ,*
+    from 
+    score_df
+    "
+    # compute society amt
+    str_amt = sprintf(str_amt,score_threshold)
+    con <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::dbWriteTable(con, "score_df", score_df,overwrite = TRUE)
+    rs <- DBI::dbSendQuery(con,str_amt)
+    decision <- dbFetch(rs)
+    DBI::dbClearResult(rs)
+    DBI::dbDisconnect(con);
+    #-----------------------------------    
+    decision$advice_amt <- round(decision$advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
+    decision$final_amt <- decision$advice_amt %>% min(.,max_loan_limit)
+    decision %>% select(score,advice,advice_amt,final_amt)
+  }
+  ,error = function(e){
+    print('error!')
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    decision %>% select(score,advice,advice_amt,final_amt)
+  })
+}
+amtFun_rent_app_edu = function(json,loan_amt_ratio = 1.0,score_threshold = 600,max_loan_limit = 8000){
+  tryCatch({
+    infos <- parse_json_2_score_features(json)
+    score <- scoreFun_rent_app_edu(json)
+    decision <- data.frame(infos,score = score)
+    decision$advice <- ifelse(score > score_threshold,1,0)
+    
+    # compute edu amt
+    edu_advice_amt_f <- function(json) {
+      tryCatch(
+        { res <- jsonlite::fromJSON(json)
+        if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$level)) return(0)
+        # compute amt
+        edu_advice_amt_check <- function(edu_level) {edu_level %>%
+            car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)}
+        amt = res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_advice_amt_check() %>% check_num()
+        amt
+        },
+        error = function(e) 0
+      )
+    }
+    decision$edu_advice_amt <- edu_advice_amt_f(json)
+    # compute final_amt
+    decision$edu_advice_amt <- round(decision$edu_advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
+    decision$advice_amt <- decision$edu_advice_amt
+    decision$final_amt <- decision$edu_advice_amt %>% min(.,max_loan_limit)
+    decision %>% select(score,advice,advice_amt,final_amt)
+  }
+  ,error = function(e){
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    decision %>% select(score,advice,advice_amt,final_amt)
+  })
+  
+}
+amtFun_cashloan = function(json,loan_amt_ratio = 1.0,score_threshold = 600,max_loan_limit = 2000){
+  tryCatch({
+    infos <- parse_json_2_score_features(json)
+    score <- scoreFun_cashloan(json)
+    score_df <- data.frame(infos,score = score)
+    #-----str_amt----------------------------------------------------
+    str_amt = "
+    select 
+    case 
+    when score > %s then 1 else 0 
+    end as advice
+    ,
+    case
+    when  huai_bei_limit is NULL  then  800
+    when	huai_bei_limit <=	1000	then	800
+    when	huai_bei_limit <=	3000 	then	1000
+    when	huai_bei_limit <=	4000 	then	1200
+    when	huai_bei_limit <=	6000 	then	1300
+    when	huai_bei_limit <=	10000 then	1400
+    when	huai_bei_limit <=	15000 then	1500
+    when	huai_bei_limit >  15000 then 1600
+    else	0			
+    end as	advice_amt			
+    ,*
+    from 
+    score_df
+    "
+    
+    # compute society amt
+    str_amt = sprintf(str_amt,score_threshold)
+    con <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::dbWriteTable(con, "score_df", score_df,overwrite = TRUE)
+    rs <- DBI::dbSendQuery(con,str_amt)
+    decision <- dbFetch(rs)
+    DBI::dbClearResult(rs)
+    DBI::dbDisconnect(con);
+    #------------------------------------------------------------    
+    decision$advice_amt <- round(decision$advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
+    decision$final_amt <- decision$advice_amt %>% min(.,max_loan_limit)
+    decision %>% select(score,advice,advice_amt,final_amt)
+  }
+  ,error = function(e){
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    decision %>% select(score,advice,advice_amt,final_amt)
+  })
+  
+}
+amtFun_rent_alipay = function(json,loan_amt_ratio = 1.0,score_threshold = 600,max_loan_limit = 10000){
+  tryCatch({
+    infos <- parse_json_2_score_features(json)
+    score <- scoreFun_rent_alipay(json)
+    score_df <- data.frame(score = score)
+    #--------str_amt---------------------------
+    str_amt = "
+    select 
+    case 
+    when score > %s then 1 else 0 
+    end as advice
+    ,
+    case
+    when	score	<=400	then	1000
+    when	score	<=500	then	2000
+    when	score	<=550	then	2500
+    when	score	<=575	then	3000
+    when	score	<=600	then	3500
+    when	score	<=625	then	4000
+    when	score	<=650	then	4500
+    when	score	<=675	then	4800
+    when	score	<=700	then	5000
+    when	score	<=750	then	6000
+    when	score	<=800	then	6500
+    when	score	<=850	then	7000
+    when	score	<=900	then	8000
+    when	score	>900	then	9000
+    else	0			
+    end as	advice_amt			
+    ,*
+    from 
+    score_df
+    "
+    # compute society amt
+    str_amt = sprintf(str_amt,score_threshold)
+    con <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::dbWriteTable(con, "score_df", score_df,overwrite = TRUE)
+    rs <- DBI::dbSendQuery(con,str_amt)
+    decision <- dbFetch(rs)
+    DBI::dbClearResult(rs)
+    DBI::dbDisconnect(con);
+    #-----------------------------------    
+    decision$advice_amt <- round(decision$advice_amt * loan_amt_ratio / 100) * 100 + round(mod(infos$age,10) / 3) * 100 # rnd
+    decision$final_amt <- decision$advice_amt %>% min(.,max_loan_limit)
+    decision %>% select(score,advice,advice_amt,final_amt)
+  }
+  ,error = function(e){
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    decision %>% select(score,advice,advice_amt,final_amt)
+  })
+  
+}
+
+# self-defined function
+car_recode <- function (var, recodes, as.factor, as.numeric = TRUE, levels) {
+  squeezeBlanks <- function (text) 
+  {
+    gsub(" *", "", text)
+  }
+  lo <- -Inf
+  hi <- Inf
+  recodes <- gsub("\n|\t", " ", recodes)
+  recode.list <- rev(strsplit(recodes, ";")[[1]])
+  is.fac <- is.factor(var)
+  if (missing(as.factor)) 
+    as.factor <- is.fac
+  if (is.fac) 
+    var <- as.character(var)
+  result <- var
+  for (term in recode.list) {
+    if (0 < length(grep(":", term))) {
+      range <- strsplit(strsplit(term, "=")[[1]][1], ":")
+      low <- try(eval(parse(text = range[[1]][1])), silent = TRUE)
+      if (class(low) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             low)
+      }
+      high <- try(eval(parse(text = range[[1]][2])), silent = TRUE)
+      if (class(high) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             high)
+      }
+      target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                    silent = TRUE)
+      if (class(target) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             target)
+      }
+      result[(var >= low) & (var <= high)] <- target
+    }
+    else if (0 < length(grep("^else=", squeezeBlanks(term)))) {
+      target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                    silent = TRUE)
+      if (class(target) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             target)
+      }
+      result[1:length(var)] <- target
+    }
+    else {
+      set <- try(eval(parse(text = strsplit(term, "=")[[1]][1])), 
+                 silent = TRUE)
+      if (class(set) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             set)
+      }
+      target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
+                    silent = TRUE)
+      if (class(target) == "try-error") {
+        stop("\n  in recode term: ", term, "\n  message: ", 
+             target)
+      }
+      for (val in set) {
+        if (is.na(val)) 
+          result[is.na(var)] <- target
+        else result[var == val] <- target
+      }
+    }
+  }
+  if (as.factor) {
+    result <- if (!missing(levels)) 
+      factor(result, levels = levels)
+    else as.factor(result)
+  }
+  else if (as.numeric && (!is.numeric(result))) {
+    result.valid <- na.omit(result)
+    opt <- options(warn = -1)
+    result.valid <- as.numeric(result.valid)
+    options(opt)
+    if (!any(is.na(result.valid))) 
+      result <- as.numeric(result)
+  }
+  result
 }
 
 
@@ -603,9 +1118,7 @@ scoreFun = function(json,str_sql,str_amt,loan_amt_ratio = 1.0,score_threshold = 
 
 
 
-
-
-
+#-------------------no use & drop ----------------------------_#
 
 str_dq = "
 /******case******/
@@ -824,96 +1337,29 @@ from
   "
   
   
-
+  
+  #---- now implement scoreFun(infos,str_dz,str_amt)-----#
+  # re.assign("infos",infos);
+  # log.info("Rpara infos = "+re.eval("infos").asString());
+  # 
+  # REXP x= new REXP();
+  # if("loan".equals(type)) {
+  #   x = re.eval("scoreFun(infos,str_dz,str_amt)");
+  # }else {
+  #   x = re.eval("scoreFun(infos,str_dq,str_amt)");
+  # }
+  # log.info("loantype= ["+type+"] R result="+ JSON.toJSONString(x));
+  #------ now implement scoreFun(infos,str_dq,str_amt)-----#
   
   
-
-    
   
-
   
-
-
-# self-defined function
-car_recode <-
-  function (var, recodes, as.factor, as.numeric = TRUE, levels) 
-  {
-    squeezeBlanks <- function (text) 
-    {
-      gsub(" *", "", text)
-    }
-    lo <- -Inf
-    hi <- Inf
-    recodes <- gsub("\n|\t", " ", recodes)
-    recode.list <- rev(strsplit(recodes, ";")[[1]])
-    is.fac <- is.factor(var)
-    if (missing(as.factor)) 
-      as.factor <- is.fac
-    if (is.fac) 
-      var <- as.character(var)
-    result <- var
-    for (term in recode.list) {
-      if (0 < length(grep(":", term))) {
-        range <- strsplit(strsplit(term, "=")[[1]][1], ":")
-        low <- try(eval(parse(text = range[[1]][1])), silent = TRUE)
-        if (class(low) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               low)
-        }
-        high <- try(eval(parse(text = range[[1]][2])), silent = TRUE)
-        if (class(high) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               high)
-        }
-        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
-                      silent = TRUE)
-        if (class(target) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               target)
-        }
-        result[(var >= low) & (var <= high)] <- target
-      }
-      else if (0 < length(grep("^else=", squeezeBlanks(term)))) {
-        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
-                      silent = TRUE)
-        if (class(target) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               target)
-        }
-        result[1:length(var)] <- target
-      }
-      else {
-        set <- try(eval(parse(text = strsplit(term, "=")[[1]][1])), 
-                   silent = TRUE)
-        if (class(set) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               set)
-        }
-        target <- try(eval(parse(text = strsplit(term, "=")[[1]][2])), 
-                      silent = TRUE)
-        if (class(target) == "try-error") {
-          stop("\n  in recode term: ", term, "\n  message: ", 
-               target)
-        }
-        for (val in set) {
-          if (is.na(val)) 
-            result[is.na(var)] <- target
-          else result[var == val] <- target
-        }
-      }
-    }
-    if (as.factor) {
-      result <- if (!missing(levels)) 
-        factor(result, levels = levels)
-      else as.factor(result)
-    }
-    else if (as.numeric && (!is.numeric(result))) {
-      result.valid <- na.omit(result)
-      opt <- options(warn = -1)
-      result.valid <- as.numeric(result.valid)
-      options(opt)
-      if (!any(is.na(result.valid))) 
-        result <- as.numeric(result)
-    }
-    result
-  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
