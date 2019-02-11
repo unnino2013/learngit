@@ -692,6 +692,11 @@ scoreFun_custom <- function(json){
         }else FALSE
       }
       cashloan_id <- res$baseInfo$cashloan_id  %>% cashloan_id_fun()
+      
+      # log
+      ID_INFO <- list(cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',ID_INFO)
       #---SCORE & RULE COMPUTE BEGIN ---#
       if(cashloan_id){
         #--- cashloan---#
