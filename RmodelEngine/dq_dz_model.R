@@ -691,7 +691,7 @@ scoreFun_custom <- function(json){
           x %>% stringr::str_to_upper() %in% c("1","TRUE","True")
         }else FALSE
       }
-      cashloan_id <- res$baseInfo$cashloan_id  %>% cashloan_id_fun()
+      cashloan_id <- res$baseInfo$is_cashloan  %>% cashloan_id_fun()
       
       # log
       ID_INFO <- list(cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
