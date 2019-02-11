@@ -697,23 +697,23 @@ scoreFun_custom <- function(json){
         #--- cashloan---#
         # score <- scoreFun_cashloan(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
-        decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
+        decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2500)
         
       }else if(alipay_id) {
         #--- rent-alipay---#
         # score <- scoreFun_rent_alipay(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
-        decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
+        decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
       }else if(student_id){
         #--- rent edu---#
         # score <- scoreFun_rent_app_edu(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
-        decision <- amtFun_rent_app_edu(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 8000)
+        decision <- amtFun_rent_app_edu(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 7000)
       }else {
         #--- rent society---#
         # score <- scoreFun_rent_app_soc(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_soc"))
-        decision <- amtFun_rent_app_soc(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2000)
+        decision <- amtFun_rent_app_soc(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 10000)
       }
       #---SCORE & RULE COMPUTE END ---#
       
