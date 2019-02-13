@@ -158,7 +158,7 @@ ruleset$rule_xuexin_xueli_limit <- function(res){
     {
       if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
       if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('ERROR:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card') 
+      if(!res$baseInfo$id_card %in% res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('ERROR:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card') 
       edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
       edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
       edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
@@ -187,7 +187,7 @@ ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1)
     {
       if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
       if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('error:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card.') 
+      if(!res$baseInfo$id_card %in% res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('ERROR:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card') 
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time) || 
          is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) stop('ERROR:res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time or res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time is null.')
       
@@ -217,7 +217,7 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
     {
       if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
       if(is.null(res$baseInfo$id_card) || is.null(res$moxieInfo$xuexinInfo$studentInfo_list$id_card)) stop('ERROR:res$baseInfo$id_card or res$moxieInfo$xuexinInfo$studentInfo_list$id_card is null.')
-      if(res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('error:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card.') 
+      if(!res$baseInfo$id_card %in% res$moxieInfo$xuexinInfo$studentInfo_list$id_card) stop('ERROR:res$baseInfo$id_card != res$moxieInfo$xuexinInfo$studentInfo_list$id_card') 
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time) || 
          is.null(res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time)) stop('ERROR:res$moxieInfo$xuexinInfo$studentInfo_list$leave_school_time or res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time is null.')
       
@@ -225,7 +225,7 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
       edu_enrollment_time  <-  res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time %>% check_date() %>% check_NA()
       edu_xuezhi <- edu_leave_school_time %>% check_date() %>% `-`(edu_enrollment_time) %>% `/`(ddays(365)) %>% ceiling() # xuezhi 1234
       
-      (edu_xuezhi >= 3)  %>% as.character()
+      (edu_xuezhi >= 3) %>% any()  %>% as.character()
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
