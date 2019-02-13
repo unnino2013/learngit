@@ -499,6 +499,67 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
     }
   )
 }
+
+
+#  trade orders' recentdeliveraddress, count for last 6 months.
+ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <- 
+  function(res,recent_address_limit = 5){
+    tryCatch(
+      { require(magrittr);require(stringr)
+        # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
+        trade_ids <- res$moxieInfo$taobaoInfo$tradedetails %>% filter(trade_status == "TRADE_FINISHED") %$% trade_id
+        res$moxieInfo$taobaoInfo$recentdeliveraddress %>% filter(trade_id %in% trade_ids) %$% deliver_address %>% length() %>% `>`(recent_address_limit) %>% as.character() 
+      },
+      error = function(e) 'ERROR'
+    )
+  }
+# success tradedetails count for last 6 months.
+ruleset$rule_taobao_order_succ_cnt <- 
+  function(res,trade_order_cnt_limit = 10){
+    tryCatch(
+      { require(magrittr);require(stringr)
+        res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
+          filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>`(trade_order_cnt_limit) %>% as.character() 
+      },
+      error = function(e) 'ERROR'
+    )
+  }
+
+
+# huabei limit
+ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+      res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric() %>% `>`(huabei_amt_limit) %>% as.character() 
+    },
+    error = function(e) 'ERROR'
+  )
+}
+# huabei can use limit 
+ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 100){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+      res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric() %>% `>`(huabei_amt_canuse_limit) %>% as.character() 
+    },
+    error = function(e) 'ERROR'
+  )
+}
+# huabei use ratio
+ruleset$rule_taobao_huabei_amt_use_ratio <- 
+  function(res,huabei_use_ratio_limit = .98){
+    tryCatch(
+      { require(magrittr);require(stringr)
+        # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+        huai_bei_can_use_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric()
+        huai_bei_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric()
+        huabei_use_ratio <- 1 - ( huai_bei_can_use_limit / huai_bei_limit)
+        huabei_use_ratio %>% `<`(huabei_use_ratio_limit) %>% as.character() 
+      },
+      error = function(e) 'ERROR'
+    )
+  }
 # rules config
 
 edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
@@ -800,19 +861,22 @@ ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu
   tryCatch(
     {
       rule_rent_app_student_state <-  c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
-                                        "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl")
+                                        "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
+                                        ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_app_society_state <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
-                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
+                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
+                                        ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_alipay            <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
       
       rule_cashloan               <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
-                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio")
+                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
+                                        ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       # ruleFun_list = ruleset$ruleFun_list
       if(product_type == "rent_app_edu"){
