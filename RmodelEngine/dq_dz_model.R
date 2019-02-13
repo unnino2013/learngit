@@ -503,7 +503,7 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
 
 #  trade orders' recentdeliveraddress, count for last 6 months.
 ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <- 
-  function(res,recent_address_limit = 5){
+  function(res,recent_address_limit = 2){
     tryCatch(
       { require(magrittr);require(stringr)
         # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
@@ -515,7 +515,7 @@ ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <-
   }
 # success tradedetails count for last 6 months.
 ruleset$rule_taobao_order_succ_cnt <- 
-  function(res,trade_order_cnt_limit = 10){
+  function(res,trade_order_cnt_limit = 5){
     tryCatch(
       { require(magrittr);require(stringr)
         res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
