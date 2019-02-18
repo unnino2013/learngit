@@ -578,6 +578,17 @@ parse_json_2_score_features <- function(json){
   }else{
     res = NULL
   }
+  #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
+  if(!is.null(res$xinyanInfo$data$result_detail)){
+    xy_result_detail <- res$xinyanInfo$data$result_detail
+  }else if(!is.null(res$xinyanInfo$result_detail)){
+    xy_result_detail <- res$xinyanInfo$result_detail
+  }else{
+    xy_result_detail <- NULL
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]xinyan: ~m'));flog.error('%s',"res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail both NULL!")
+  }
+  #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--end--#
   infos <- data_frame(
     # dq
     realname = res$baseInfo$realname %>% check_char(),
@@ -586,15 +597,15 @@ parse_json_2_score_features <- function(json){
     age = res$baseInfo$age  %>% check_num(),
     sex = res$baseInfo$sex %>% check_char(),
     zaiwang = res$baseInfo$zaiwang %>% check_char(),
-    query_sum_count = res$xinyanInfo$data$result_detail$apply_report_detail$query_sum_count  %>% check_num(),
-    loans_cash_count = res$xinyanInfo$data$result_detail$behavior_report_detail$loans_cash_count  %>% check_num(),
-    history_fail_fee = res$xinyanInfo$data$result_detail$behavior_report_detail$history_fail_fee  %>% check_num(),
+    query_sum_count = xy_result_detail$apply_report_detail$query_sum_count  %>% check_num(),
+    loans_cash_count = xy_result_detail$behavior_report_detail$loans_cash_count  %>% check_num(),
+    history_fail_fee = xy_result_detail$behavior_report_detail$history_fail_fee  %>% check_num(),
     # dz
     zm_jianmian = res$baseInfo$zm_jianmian  %>% check_num(),
     real_mianya_ratio = res$baseInfo$real_mianya_ratio  %>% check_num(),
-    latest_three_month = res$xinyanInfo$data$result_detail$apply_report_detail$latest_three_month %>% check_num(),
-    loans_score = res$xinyanInfo$data$result_detail$behavior_report_detail$loans_score %>% check_num(),
-    loans_credibility = res$xinyanInfo$data$result_detail$behavior_report_detail$loans_credibility %>% check_num(),
+    latest_three_month = xy_result_detail$apply_report_detail$latest_three_month %>% check_num(),
+    loans_score = xy_result_detail$behavior_report_detail$loans_score %>% check_num(),
+    loans_credibility = xy_result_detail$behavior_report_detail$loans_credibility %>% check_num(),
     
     # taobao jiebei huabei zhimafen
     taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num(),
