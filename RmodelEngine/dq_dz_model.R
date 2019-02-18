@@ -752,21 +752,16 @@ scoreFun_custom <- function(json){
       
       res <- jsonlite::fromJSON(json)
       # compute alipay id
-      zm_code <- paste('Z',1:5,sep='')
-      alipay_id <- res$baseInfo$zmscore %in% zm_code
+      # zm_code <- paste('Z',1:5,sep='')
+      alipay_id <- res$baseInfo$is_alipay %>% check_NA() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
       # compute edu & society id
-      society_id = is.null(res$moxieInfo$xuexinInfo) || !(ruleset[["rule_xuexin_xueli_limit"]](res) %in% 'TRUE')
-      student_id = !society_id
+      society_id <- res$baseInfo$is_app_society %>% check_NA() %>%  stringr::str_to_upper() %in% c("1","TRUE","True")
+      student_id <- res$baseInfo$is_app_student %>% check_NA() %>%  stringr::str_to_upper() %in% c("1","TRUE","True")
       # compute cashloan id
-      cashloan_id_fun <- function(x){
-        if(length(x)){
-          x %>% stringr::str_to_upper() %in% c("1","TRUE","True")
-        }else FALSE
-      }
-      cashloan_id <- res$baseInfo$is_cashloan  %>% cashloan_id_fun()
+      cashloan_id <- res$baseInfo$is_cashloan  %>% check_NA() %>%  stringr::str_to_upper() %in% c("1","TRUE","True")
       
       # log
-      ID_INFO <- list(cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
+      ID_INFO <- list(realname = res$baseInfo$realname,id_card = res$baseInfo$id_card,tel = res$baseInfo$tel,cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',ID_INFO)
       #---SCORE & RULE COMPUTE BEGIN ---#
