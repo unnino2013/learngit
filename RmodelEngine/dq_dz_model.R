@@ -46,7 +46,7 @@ ruleset$rule_age <- function(res=list(),age_limit = c(18,45)){
       between(age,age_limit[1],age_limit[2]) %>% as.character()},
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_age: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -60,7 +60,7 @@ ruleset$rule_sanyaosu <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_sanyaosu: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -74,7 +74,7 @@ ruleset$rule_zaiwang <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_zaiwang: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -93,7 +93,7 @@ ruleset$rule_zmscore <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_zmscore: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -109,7 +109,7 @@ ruleset$rule_taobao_his_days <- function(res,taobao_his_days_limit = 90){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_his_days: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -147,7 +147,7 @@ ruleset$rule_taobao_shiming <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_shiming: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -177,7 +177,7 @@ ruleset$rule_xuexin_xueli_limit <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_xuexin_xueli_limit: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -207,7 +207,7 @@ ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1)
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_xuexin_in_school_limit: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -229,7 +229,7 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_xuexin_xuezhi_limit: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -249,7 +249,7 @@ ruleset$rule_yyx_shiming <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_shiming: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -266,7 +266,7 @@ ruleset$rule_yyx_his <- function(res,yys_his_days_limit = 180){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_his: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -280,7 +280,7 @@ ruleset$rule_yyx_zaiwang_state <- function(res){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_zaiwang_state: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -302,7 +302,7 @@ ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_nu
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_topin_txl: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -322,7 +322,7 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_concentrate: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -342,7 +342,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_Silent_days_n7_cnt: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -360,7 +360,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_Silent_days_n5_cnt: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -378,7 +378,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_Silent_days_n3_cnt: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -404,7 +404,7 @@ ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last6m_dialed_succ_ratio: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -428,7 +428,7 @@ ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last3m_dialed_succ_ratio: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -452,7 +452,7 @@ ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_yyx_call_last1m_dialed_succ_ratio: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -494,7 +494,7 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]rule_txl: ~m'));flog.error('%s',e)
       "ERROR"
     }
   )
@@ -510,7 +510,11 @@ ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <-
         trade_ids <- res$moxieInfo$taobaoInfo$tradedetails %>% filter(trade_status == "TRADE_FINISHED") %$% trade_id
         res$moxieInfo$taobaoInfo$recentdeliveraddress %>% filter(trade_id %in% trade_ids) %$% deliver_address %>% length() %>% `>`(recent_address_limit) %>% as.character() 
       },
-      error = function(e) 'ERROR'
+      error = function(e){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_taobao_order_succ_recentdeliveraddress_cnt: ~m'));flog.error('%s',e)
+        "ERROR"
+      }
     )
   }
 # success tradedetails count for last 6 months.
@@ -521,7 +525,11 @@ ruleset$rule_taobao_order_succ_cnt <-
         res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
           filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>`(trade_order_cnt_limit) %>% as.character() 
       },
-      error = function(e) 'ERROR'
+      error = function(e){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_taobao_order_succ_cnt: ~m'));flog.error('%s',e)
+        "ERROR"
+      }
     )
   }
 
@@ -531,9 +539,14 @@ ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+      if(is.null(res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit)) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit is NULL!")
       res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric() %>% `>`(huabei_amt_limit) %>% as.character() 
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_huabei_amt: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 # huabei can use limit 
@@ -541,9 +554,14 @@ ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+      if(is.null(res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit)) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit is NULL!")
       res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric() %>% `>`(huabei_amt_canuse_limit) %>% as.character() 
     },
-    error = function(e) 'ERROR'
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_huabei_amt_canuse: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
   )
 }
 # huabei use ratio
@@ -552,12 +570,17 @@ ruleset$rule_taobao_huabei_amt_use_ratio <-
     tryCatch(
       { require(magrittr);require(stringr)
         # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+        if(is.null(res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit)) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit is NULL!")
         huai_bei_can_use_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric()
         huai_bei_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric()
         huabei_use_ratio <- 1 - ( huai_bei_can_use_limit / huai_bei_limit)
         huabei_use_ratio %>% `<`(huabei_use_ratio_limit) %>% as.character() 
       },
-      error = function(e) 'ERROR'
+      error = function(e){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_taobao_huabei_amt_use_ratio: ~m'));flog.error('%s',e)
+        "ERROR"
+      }
     )
   }
 # rules config
@@ -736,7 +759,7 @@ scoreFun_base  = function(json){
   }
   ,error = function(e){
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]scoreFun_base: ~m'));flog.error('%s',e)
     score = 0L 
     score
   })
@@ -763,7 +786,7 @@ scoreFun_custom <- function(json){
       # log
       ID_INFO <- list(realname = res$baseInfo$realname,id_card = res$baseInfo$id_card,tel = res$baseInfo$tel,cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',ID_INFO)
+                  layout.format('[~l] [~t] [~n.~f]cust_status: ~m'));flog.info('%s',ID_INFO)
       #---SCORE & RULE COMPUTE BEGIN ---#
       if(cashloan_id){
         #--- cashloan---#
@@ -804,7 +827,7 @@ scoreFun_custom <- function(json){
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]scoreFun_custom: ~m'));flog.error('%s',e)
       decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
       list(decision = decision)
     }
@@ -816,26 +839,25 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
   tryCatch({
     # log
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',json)
+                layout.format('[~l] [~t] [~n.~f]jsondata: ~m'));flog.info('%s',json)
     
     if(jsonlite::validate(json)){
       rt <- scoreFun_custom(json) 
       decision <- rt$decision
       res <- jsonlite::fromJSON(json);# print log
+      # log
+      cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]cust_info: ~m'));flog.info('%s',cust_info)
+      
+      decision %>% jsonlite::toJSON(na = 'null')
     }else{
-      decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+      stop("error:customer infos data must be json!")
     }
-    
-    # log
-    cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
-    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.info('%s',cust_info)
-    
-    decision %>% jsonlite::toJSON(na = 'null')
   }
   ,error = function(e){
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]scoreFun: ~m'));flog.error('%s',e)
     decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
     decision %>% jsonlite::toJSON(na = 'null')
   })
@@ -858,7 +880,7 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
     }
     ,error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]ruleFun_base: ~m'));flog.error('%s',e)
       NULL
     }
   )
@@ -899,7 +921,7 @@ ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu
     }
     ,error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                  layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                  layout.format('[~l] [~t] [~n.~f]ruleFun_custom: ~m'));flog.error('%s',e)
       NULL
     }
   )
@@ -961,7 +983,7 @@ amtFun_rent_app_soc = function(json,loan_amt_ratio = 1.0,score_threshold = 600,m
   ,error = function(e){
     print('error!')
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]amtFun_rent_app_soc: ~m'));flog.error('%s',e)
     decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
     decision %>% select(score,advice,advice_amt,final_amt)
   })
@@ -996,7 +1018,7 @@ amtFun_rent_app_edu = function(json,loan_amt_ratio = 1.0,score_threshold = 600,m
   }
   ,error = function(e){
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]amtFun_rent_app_edu: ~m'));flog.error('%s',e)
     data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
     decision %>% select(score,advice,advice_amt,final_amt)
   })
@@ -1045,7 +1067,7 @@ amtFun_cashloan = function(json,loan_amt_ratio = 1.0,score_threshold = 600,max_l
   }
   ,error = function(e){
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]amtFun_cashloan: ~m'));flog.error('%s',e)
     decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
     decision %>% select(score,advice,advice_amt,final_amt)
   })
@@ -1099,7 +1121,7 @@ amtFun_rent_alipay = function(json,loan_amt_ratio = 1.0,score_threshold = 600,ma
   }
   ,error = function(e){
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]msgs: ~m'));flog.error('%s',e)
+                layout.format('[~l] [~t] [~n.~f]amtFun_rent_alipay: ~m'));flog.error('%s',e)
     decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
     decision %>% select(score,advice,advice_amt,final_amt)
   })
