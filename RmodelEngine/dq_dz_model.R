@@ -794,17 +794,17 @@ scoreFun_custom <- function(json){
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
         decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2500)
         
-      }else if(alipay_id && (society_id == FALSE)) {
+      }else if(alipay_id && (society_id == FALSE && student_id == FALSE)) {
         #--- rent-alipay---#
         # score <- scoreFun_rent_alipay(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
         decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
-      }else if(alipay_id && (society_id == TRUE)) {
+      }else if(alipay_id && (society_id == TRUE || student_id == TRUE)) {
         #--- rent-alipay-app---#
         # score <- scoreFun_rent_alipay(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay_app"))
         decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
-      }else if(student_id){
+      }else if((alipay_id == FALSE) && student_id){
         #--- rent edu---#
         # score <- scoreFun_rent_app_edu(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
