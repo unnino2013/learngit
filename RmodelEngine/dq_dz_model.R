@@ -794,10 +794,15 @@ scoreFun_custom <- function(json){
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
         decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2500)
         
-      }else if(alipay_id) {
+      }else if(alipay_id && (society_id == FALSE)) {
         #--- rent-alipay---#
         # score <- scoreFun_rent_alipay(json)
         rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
+        decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
+      }else if(alipay_id && (society_id == TRUE)) {
+        #--- rent-alipay-app---#
+        # score <- scoreFun_rent_alipay(json)
+        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay_app"))
         decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
       }else if(student_id){
         #--- rent edu---#
@@ -885,7 +890,7 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
     }
   )
 }
-ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","cashloan")){
+ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan")){
   tryCatch(
     {
       rule_rent_app_student_state <-  c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
@@ -899,6 +904,7 @@ ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_alipay            <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
+      rule_rent_alipay_app        <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
       
       rule_cashloan               <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
@@ -913,11 +919,15 @@ ruleFun_custom <- function(json,ruleset = ruleset,product_type = c("rent_app_edu
         ruleFun_base(json,rules_config = rule_rent_app_society_state,ruleset) -> rt
       }else if(product_type == "rent_alipay"){
         ruleFun_base(json,rules_config = rule_rent_alipay,ruleset) -> rt
+      }else if(product_type == "rent_alipay_app"){
+        ruleFun_base(json,rules_config = rule_rent_alipay_app,ruleset) -> rt
       }else if(product_type == "cashloan"){
         ruleFun_base(json,rules_config = rule_cashloan,ruleset) -> rt
       }else{
         NULL -> rt
       }
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]ruleFun_custom: ~m'));flog.info('product_type:%s',product_type)
     }
     ,error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
