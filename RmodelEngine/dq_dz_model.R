@@ -291,6 +291,7 @@ ruleset$rule_yyx_call_last6m_topin_txl <- function(res,duration_limit = 6,top_nu
                                                    intersect_limit = 0){
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       txl = res$tongxunluInfo$tel %>% stringr::str_remove_all("(\\s)|-|(\\+86)")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
@@ -312,6 +313,7 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
                                                      concentrate = 0.8){
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp %>% dplyr::filter(duration >= duration_limit, nchar(peer_number) == 11) %>% 
@@ -334,6 +336,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
   
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
@@ -352,6 +355,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
   
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
@@ -370,6 +374,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
   
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp$time %>% as.POSIXct() %>% sort(decreasing = F) %>% 
@@ -390,6 +395,7 @@ ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 
                                                            dialed_succ_ratio = .2){
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
@@ -414,6 +420,7 @@ ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 
                                                            dialed_succ_ratio = .2){
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
@@ -438,6 +445,7 @@ ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 
                                                            dialed_succ_ratio = .2){
   tryCatch(
     {
+      if(is.null(res$moxieInfo$yunyingshangInfo$calls$items)) stop("error:res$moxieInfo$yunyingshangInfo$calls$items is NULL!")
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
         do.call('rbind',.) -> tmp
       tmp %>% dplyr::filter(stringr::str_to_upper(dial_type) == "DIALED") %>% 
@@ -507,6 +515,7 @@ ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <-
     tryCatch(
       { require(magrittr);require(stringr)
         # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
+        if(is.null(res$moxieInfo$taobaoInfo$tradedetails)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
         trade_ids <- res$moxieInfo$taobaoInfo$tradedetails %>% filter(trade_status == "TRADE_FINISHED") %$% trade_id
         res$moxieInfo$taobaoInfo$recentdeliveraddress %>% filter(trade_id %in% trade_ids) %$% deliver_address %>% length() %>% `>`(recent_address_limit) %>% as.character() 
       },
@@ -522,6 +531,7 @@ ruleset$rule_taobao_order_succ_cnt <-
   function(res,trade_order_cnt_limit = 5){
     tryCatch(
       { require(magrittr);require(stringr)
+        if(is.null(res$moxieInfo$taobaoInfo$tradedetails)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
         res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
           filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>`(trade_order_cnt_limit) %>% as.character() 
       },
