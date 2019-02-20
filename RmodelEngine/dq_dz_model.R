@@ -387,7 +387,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
 # rule dialed success ratio
 ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 6,
                                                            last_days = 180,
-                                                           dialed_succ_ratio = .3){
+                                                           dialed_succ_ratio = .2){
   tryCatch(
     {
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
@@ -411,7 +411,7 @@ ruleset$rule_yyx_call_last6m_dialed_succ_ratio <- function(res,duration_limit = 
 }
 ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 6,
                                                            last_days = 90,
-                                                           dialed_succ_ratio = .3){
+                                                           dialed_succ_ratio = .2){
   tryCatch(
     {
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
@@ -435,7 +435,7 @@ ruleset$rule_yyx_call_last3m_dialed_succ_ratio <- function(res,duration_limit = 
 }
 ruleset$rule_yyx_call_last1m_dialed_succ_ratio <- function(res,duration_limit = 6,
                                                            last_days = 30,
-                                                           dialed_succ_ratio = .3){
+                                                           dialed_succ_ratio = .2){
   tryCatch(
     {
       res$moxieInfo$yunyingshangInfo$calls$items %>% 
@@ -550,7 +550,7 @@ ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
   )
 }
 # huabei can use limit 
-ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 100){
+ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 50){
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
@@ -900,7 +900,7 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
       rule_rent_app_society_state <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
-                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
+                                        "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio", # "rule_yyx_call_last1m_dialed_succ_ratio"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_alipay            <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
