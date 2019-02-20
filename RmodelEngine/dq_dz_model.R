@@ -611,15 +611,16 @@ parse_json_2_score_features <- function(json){
   }else{
     res = NULL
   }
+  # suanhua
+  if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
   #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
+  if(is.null(res$xinyanInfo$trans_id) && is.null(res$xinyanInfo$data$trans_id)) stop("error:res$xinyanInfo is NULL!")
   if(!is.null(res$xinyanInfo$data$result_detail)){
     xy_result_detail <- res$xinyanInfo$data$result_detail
   }else if(!is.null(res$xinyanInfo$result_detail)){
     xy_result_detail <- res$xinyanInfo$result_detail
   }else{
     xy_result_detail <- NULL
-    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]xinyan: ~m'));flog.error('%s',"res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail both NULL!")
   }
   #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--end--#
   infos <- data_frame(
