@@ -34,6 +34,28 @@ check_NA <- function(x){
 
 ruleset <- NULL
 # base
+ruleset$rule_region <- function(res){
+  tryCatch(
+    {
+      id_card <- res$baseInfo$id_card
+      if(is.null(id_card)) stop("error:id_card is NULL!")
+      risk_list <- c('65','54','81','82','71') 
+      risk_list1 <- c('5203','4502','4524','4508',
+                      '6402','6403','6422','4527',
+                      '5224','5223','4521','3508',
+                      '3504','4526','4505','3506',
+                      '4506','5225','3521','3509',
+                      '5202','5226','4504','5001','4503')
+      ret <- (str_sub(id_card,1,2) %in% risk_list) || (str_sub(id_card,1,4) %in% risk_list1)
+      (!ret) %>% as.character()
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_region: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 ruleset$rule_age <- function(res=list(),age_limit = c(18,45)){
   tryCatch(
     {
