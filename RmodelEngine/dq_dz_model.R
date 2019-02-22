@@ -926,20 +926,20 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
 ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan")){
   tryCatch(
     {
-      rule_rent_app_student_state <-  c("rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
+      rule_rent_app_student_state <-  c("rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                                         "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_app_society_state <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+      rule_rent_app_society_state <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio" 
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_alipay            <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
-      rule_rent_alipay_app        <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
+      rule_rent_alipay            <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
+      rule_rent_alipay_app        <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
       
-      rule_cashloan               <-  c("rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+      rule_cashloan               <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
