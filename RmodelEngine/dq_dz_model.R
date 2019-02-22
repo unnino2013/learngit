@@ -537,7 +537,7 @@ ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <-
     tryCatch(
       { require(magrittr);require(stringr)
         # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
-        if(is.null(res$moxieInfo$taobaoInfo$tradedetails)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
+        if(is.null(res$moxieInfo$taobaoInfo$tradedetails$trade_createtime)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
         trade_ids <- res$moxieInfo$taobaoInfo$tradedetails %>% filter(trade_status == "TRADE_FINISHED") %$% trade_id
         res$moxieInfo$taobaoInfo$recentdeliveraddress %>% filter(trade_id %in% trade_ids) %$% deliver_address %>% length() %>% `>`(recent_address_limit) %>% as.character() 
       },
@@ -553,7 +553,7 @@ ruleset$rule_taobao_order_succ_cnt <-
   function(res,trade_order_cnt_limit = 5){
     tryCatch(
       { require(magrittr);require(stringr)
-        if(is.null(res$moxieInfo$taobaoInfo$tradedetails)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
+        if(is.null(res$moxieInfo$taobaoInfo$tradedetails$trade_createtime)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
         res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
           filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>`(trade_order_cnt_limit) %>% as.character() 
       },
