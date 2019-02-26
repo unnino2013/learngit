@@ -615,7 +615,39 @@ ruleset$rule_taobao_huabei_amt_use_ratio <-
       }
     )
   }
-# rules config
+
+# xinyan rule
+ruleset$rule_xinyan_error <- function(res){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
+      if(is.null(res$xinyanInfo) || (!length(res$xinyanInfo))) stop("error:res$xinyanInfo is NULL!")
+      if(is.null(res$xinyanInfo$trans_id) && is.null(res$xinyanInfo$data$trans_id)) stop("error:res$xinyanInfo is NULL!")
+      "TRUE"
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_xinyan_error: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+# suanhua rule
+ruleset$rule_suanhua_error <- function(res){
+    tryCatch(
+      { 
+        # suanhua
+        if(is.null(res$suanhuaInfo) || (!length(res$suanhuaInfo))) stop("error:res$xinyanInfo is NULL!")
+        if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
+        "TRUE"
+      },
+      error = function(e){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_suanhua_error: ~m'));flog.error('%s',e)
+        "ERROR"
+      }
+    )
+  }
 
 edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
 edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
@@ -634,9 +666,9 @@ parse_json_2_score_features <- function(json){
     res = NULL
   }
   # suanhua
-  if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
-  #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
-  if(is.null(res$xinyanInfo$trans_id) && is.null(res$xinyanInfo$data$trans_id)) stop("error:res$xinyanInfo is NULL!")
+  # if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
+  # #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
+  # if(is.null(res$xinyanInfo$trans_id) && is.null(res$xinyanInfo$data$trans_id)) stop("error:res$xinyanInfo is NULL!")
   if(!is.null(res$xinyanInfo$data$result_detail)){
     xy_result_detail <- res$xinyanInfo$data$result_detail
   }else if(!is.null(res$xinyanInfo$result_detail)){
@@ -926,20 +958,20 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
 ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan")){
   tryCatch(
     {
-      rule_rent_app_student_state <-  c("rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
+      rule_rent_app_student_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                                         "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_app_society_state <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+      rule_rent_app_society_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio" 
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_alipay            <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
-      rule_rent_alipay_app        <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
+      rule_rent_alipay            <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
+      rule_rent_alipay_app        <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
       
-      rule_cashloan               <-  c("rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+      rule_cashloan               <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
