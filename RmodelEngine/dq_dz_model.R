@@ -354,7 +354,7 @@ ruleset$rule_yyx_call_last6m_concentrate <- function(res,duration_limit = 6,top_
 
 # rule silent days
 ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
-                                                            limit_cnt = 5){
+                                                            limit_cnt = 10){
   
   tryCatch(
     {
@@ -373,7 +373,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n7_cnt <- function(res,silent_days = 7,
   )
 }
 ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
-                                                            limit_cnt = 10){
+                                                            limit_cnt = 20){
   
   tryCatch(
     {
@@ -392,7 +392,7 @@ ruleset$rule_yyx_call_last6m_Silent_days_n5_cnt <- function(res,silent_days = 5,
   )
 }
 ruleset$rule_yyx_call_last6m_Silent_days_n3_cnt <- function(res,silent_days = 3,
-                                                            limit_cnt = 20){
+                                                            limit_cnt = 30){
   
   tryCatch(
     {
