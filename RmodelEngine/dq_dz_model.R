@@ -507,7 +507,7 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
       #-- configs start---
       validate_limit = 20;
       qingshu_limit = 1;
-      black_limit = 20
+      black_limit = 10
       #-- configs end---
       # if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
       txl <- res$tongxunluInfo
@@ -520,7 +520,7 @@ ruleset$rule_txl <- function(res,tel = 'tel',name = 'name'){
       validate_num <- txl[,tel] %>% length()
       qingshu_num <- txl[,name] %>% sapply(function(x) sapply(qinshu_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
       black_num <- txl[,name] %>% sapply(function(x) sapply(black_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
-      (validate_num >= validate_limit & qingshu_num > qingshu_limit & black_num <= black_limit) %>% as.character() 
+      (validate_num >= validate_limit & qingshu_num >= qingshu_limit & black_num <= black_limit) %>% as.character() 
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
