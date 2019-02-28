@@ -629,14 +629,19 @@ apv_skip_through_of_zmscore_huabei <- function(res){
       taobao_zmscore_grade = taobao_zmscore %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
       zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
       zmscore_over_700 <- zmscore %in% c('Z1','Z2') 
-      
+      if(is.null(huabei_overdue) || is.na(huabei_overdue)) huabei_overdue <- FALSE
+      if(is.null(huai_bei_limit) || is.na(huai_bei_limit)) huai_bei_limit <- 0
+      if(is.null(zmscore_over_700) || is.na(zmscore_over_700)) zmscore_over_700 <- FALSE
       if(is.null(huabei_overdue)){
-        (huai_bei_limit >= 10000 || zmscore_over_700)
+        (huai_bei_limit >= 10000 || zmscore_over_700) -> rt
       }else if(huabei_overdue %in% c(TRUE,FALSE)){
-        (huai_bei_limit >= 10000 || zmscore_over_700) && !huabei_overdue
+        ((huai_bei_limit >= 10000 || zmscore_over_700) && !huabei_overdue)  -> rt
       }else{
-        (huai_bei_limit >= 10000 || zmscore_over_700) 
+        (huai_bei_limit >= 10000 || zmscore_over_700)  -> rt 
       }
+      if(is.null(rt) || is.na(rt)) stop("error:apv_skip_through_of_zmscore_huabei produce error,rt is NULL!")
+      if(!rt %in% c(T,F)) stop("error:apv_skip_through_of_zmscore_huabei produce error,rt is not logic!")
+      rt
       # alipay
     }
     ,error = function(e){
