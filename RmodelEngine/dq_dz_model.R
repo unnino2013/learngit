@@ -616,6 +616,99 @@ ruleset$rule_taobao_huabei_amt_use_ratio <-
     )
   }
 
+# skip through rules
+apv_skip_through_of_zmscore_huabei <- function(res){
+  tryCatch(
+    {
+      # res <- jsonlite::fromJSON(json)
+      huabei_overdue <- res$moxieInfo$alipayInfo$wealth$huabei_overdue 
+      huai_bei_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num()
+      # zhifubaomianya & taobao scpyder jianrong
+      zm_zmscore = res$baseInfo$zmscore %>% check_char()
+      taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
+      taobao_zmscore_grade = taobao_zmscore %>% car_recode("0:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
+      zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
+      zmscore_over_700 <- zmscore %in% c('Z1','Z2') 
+      
+      if(is.null(huabei_overdue)){
+        (huai_bei_limit >= 10000 || zmscore_over_700)
+      }else if(huabei_overdue %in% c(TRUE,FALSE)){
+        (huai_bei_limit >= 10000 || zmscore_over_700) && !huabei_overdue
+      }else{
+        (huai_bei_limit >= 10000 || zmscore_over_700) 
+      }
+      # alipay
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]apv_skip_through_of_zmscore_huabei: ~m'));flog.error('%s',e)
+      FALSE
+    }
+  )
+}
+
+ruleset$rule_apv_skip_through_of_zmscore_huabei <- function(res){
+  tryCatch(
+    {
+      apv_skip_through_of_zmscore_huabei(res) %>% as.character()
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_apv_skip_through_of_zmscore_huabei: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+ruleset$rule_taobao_alipay_shiming <- function(res){
+  tryCatch(
+    {
+      realname <- res$baseInfo$realname 
+      alipay_realname <- res$moxieInfo$alipayInfo$userinfo$user_name
+      # tel <- res$baseInfo$tel
+      # alipay_tel <- res$moxieInfo$alipayInfo$userinfo$phone_number
+      id_card <- res$baseInfo$id_card
+      id_1_18 <- id_card %>% str_sub(1,1) %>% str_c(id_card %>% str_sub(18,18)) 
+      alipay_id <- res$moxieInfo$alipayInfo$userinfo$idcard_number
+      alipay_id_1_18 <- alipay_id %>% str_sub(1,1) %>% str_c(alipay_id %>% str_sub(18,18))
+      rt <- (realname == alipay_realname) && (id_1_18 == alipay_id_1_18) 
+      rt %>% as.character()
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipay_shiming: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
+ruleset$rule_taobao_alipayinfo_error <- function(res){
+  tryCatch(
+    {
+      if(!length(res$moxieInfo$alipayInfo)) stop("error:res$moxieInfo$alipayInfo is NULL!")
+      if(is.null(res$moxieInfo$alipayInfo$wealth)) stop("error:res$moxieInfo$alipayInfo$wealth is NULL")
+      "TRUE"
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipayinfo_error: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
+ruleset$rule_taobao_alipayinfo_huabei_overdue <- function(res){
+  tryCatch(
+    {
+      res$moxieInfo$alipayInfo$wealth$huabei_overdue %>% `==`(FALSE) %>% as.character()
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipayinfo_huabei_overdue: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
 # xinyan rule
 ruleset$rule_xinyan_error <- function(res){
   tryCatch(
@@ -804,13 +897,112 @@ scoreFun_base  = function(json){
   from  infos --you should modify the table name. 
   )a 
   )b"
+  
+  str_sql_huabei = "
+  /******case******/
+  /** 
+  infos = 
+  **/
+  
+  select 
+  --#------------------scorescale2sql----------------------#
+  383.903595255632  +  72.1347520444482  * log(score_p / (1-score_p))  as score,
+  *  
+  from 
+  ( select 
+  1/(1 + exp(-1 * (1 * 1.57124794845992 + zaiwang * 0.998620195318036 + 
+  sex * 0.708322586241409 + age * 0.945319075870239 + huai_bei_limit * 
+  0.920134447328887 + query_sum_count * 0.774599560824178 + loans_cash_count * 
+  0.0032585981654242 + history_fail_fee * 0.295654539546532)))  as score_p,
+  *  
+  from 
+  ( select 
+  /****** zaiwang ******/
+  case 
+  when zaiwang in ( '1' ) then -1.90791154596408  
+  when zaiwang in ( '3' ) then 0.264145159665213 
+  when zaiwang in ( '4' ) then 0.556686098339944 
+  when zaiwang in ( '2' ) then -1.25732397982293 
+  when zaiwang in ( '' ) then -1.90791154596408  --2.89396786284092 adjust 1.90791154596408
+  else  -0.09999  end as 
+  zaiwang ,
+  /******************************/
+  /****** sex ******/
+  case 
+  when sex in ( 'female' ) then 0.813148891874145 
+  when sex in ( 'male' ) then -0.172317343210599  
+  else  -0.09999  end as 
+  sex ,
+  /******************************/
+  /****** age ******/
+  case 
+  when  age <=23 then 1.30280609120266 
+  when 23 < age  then -0.334857665904626  
+  else  -0.09999  end as 
+  age ,
+  /******************************/
+  /****** huai_bei_limit ******/
+  case 
+  when huai_bei_limit is null then -2.76878148389683  
+  when huai_bei_limit <= 0 then  -2.76878148389683  
+  when 0 < huai_bei_limit and huai_bei_limit <= 199 then -0.48
+  when 199 < huai_bei_limit and huai_bei_limit <= 499 then -0.37
+  when 499 < huai_bei_limit and huai_bei_limit <= 999 then -0.11
+  when 999 < huai_bei_limit and huai_bei_limit <= 2999 then 0.08
+  when 2999 < huai_bei_limit and huai_bei_limit <= 3999 then 0.39
+  when 3999 < huai_bei_limit and huai_bei_limit <= 5999 then 1.02
+  when 5999 < huai_bei_limit and huai_bei_limit <= 9999 then 1.06014972566487 
+  when 9999 < huai_bei_limit and huai_bei_limit <= 14999 then 1.18
+  when 14999 < huai_bei_limit and huai_bei_limit <= 20000 then 2.91513836166312
+  when 20000 < huai_bei_limit                              then 5.93072313092869
+  else  -0.09999  end as 
+  huai_bei_limit ,
+  /******************************/
+  /****** query_sum_count ******/
+  case 
+  when  query_sum_count IS NULL then 1.37898231642044 
+  when  query_sum_count <=2 then 1.49951638544871 
+  when 2 < query_sum_count and query_sum_count <=4 then 1.27339220599636 
+  when 4 < query_sum_count and query_sum_count <=8 then -0.500460984876878 
+  when 8 < query_sum_count and query_sum_count <=21 then -1.04601488615572 
+  when 21 < query_sum_count  then -1.72325428368103  
+  else  -0.09999  end as 
+  query_sum_count ,
+  /******************************/
+  /****** loans_cash_count ******/
+  case 
+  when  loans_cash_count IS NULL then 0.512129731890826 
+  when  loans_cash_count <=0 then 0.595060111221559 
+  when 0 < loans_cash_count and loans_cash_count <=1 then 0.172645444799622 
+  when 1 < loans_cash_count and loans_cash_count <=5 then -1.15934357146273 
+  when 5 < loans_cash_count  then -2.32776539152434  
+  else  -0.09999  end as 
+  loans_cash_count ,
+  /******************************/
+  /****** history_fail_fee ******/
+  case 
+  when  history_fail_fee IS NULL then 0.512129731890826 
+  when  history_fail_fee <=0 then 1.39943292689173 
+  when 0 < history_fail_fee and history_fail_fee <=1 then -0.0980870693383861 
+  when 1 < history_fail_fee and history_fail_fee <=3 then -0.328610727950218 
+  when 3 < history_fail_fee and history_fail_fee <=12 then -1.35576405263618 
+  when 12 < history_fail_fee  then -1.90168099621344  
+  else  -0.09999  end as 
+  history_fail_fee  
+  from  infos --you should modify the table name. 
+  )a 
+  )b"
 #-------------
   tryCatch({
     infos <- parse_json_2_score_features(json)
     library(DBI);library(RSQLite)
     con <- dbConnect(RSQLite::SQLite(), ":memory:")
     RSQLite::dbWriteTable(con, "infos", infos,overwrite = TRUE)
-    rs <- DBI::dbSendQuery(con,str_sql)
+    if(infos$zmscore %in% c('Z1','Z2','Z3','Z4','Z5')){
+      rs <- DBI::dbSendQuery(con,str_sql)
+    }else{
+      rs <- DBI::dbSendQuery(con,str_sql_huabei)
+    }
     infos_w <- dbFetch(rs)
     DBI::dbClearResult(rs)
     DBI::dbDisconnect(con);
@@ -852,32 +1044,54 @@ scoreFun_custom <- function(json){
       ID_INFO <- list(realname = res$baseInfo$realname,id_card = res$baseInfo$id_card,tel = res$baseInfo$tel,cashloan_id = cashloan_id,alipay_id = alipay_id,society_id = society_id,student_id = student_id) %>% jsonlite::toJSON(null = 'null')
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]cust_status: ~m'));flog.info('%s',ID_INFO)
+      # apv skip through check
+      apv_skip_state <- apv_skip_through_of_zmscore_huabei(res)
       #---SCORE & RULE COMPUTE BEGIN ---#
       if(cashloan_id){
         #--- cashloan---#
         # score <- scoreFun_cashloan(json)
-        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
+        if(apv_skip_state){
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("apv_skip_throuth"))
+        }else{
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("cashloan"))
+        }
         decision <- amtFun_cashloan(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 2500)
         
       }else if(alipay_id && (society_id == FALSE && student_id == FALSE)) {
         #--- rent-alipay---#
         # score <- scoreFun_rent_alipay(json)
-        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
+        if(apv_skip_state){
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("alipay_apv_skip_throuth"))
+        }else{
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay"))
+        }
         decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
       }else if(alipay_id && (society_id == TRUE || student_id == TRUE)) {
         #--- rent-alipay-app---#
         # score <- scoreFun_rent_alipay(json)
-        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay_app"))
+        if(apv_skip_state){
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("alipay_apv_skip_throuth"))
+        }else{
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_alipay_app"))
+        }
         decision <- amtFun_rent_alipay(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 9000)
       }else if((alipay_id == FALSE) && student_id){
         #--- rent edu---#
         # score <- scoreFun_rent_app_edu(json)
-        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
+        if(apv_skip_state){
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("apv_skip_throuth"))
+        }else{
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
+        }
         decision <- amtFun_rent_app_edu(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 7000)
       }else {
         #--- rent society---#
         # score <- scoreFun_rent_app_soc(json)
-        rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_soc"))
+        if(apv_skip_state){
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("apv_skip_throuth"))
+        }else{
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_soc"))
+        }
         decision <- amtFun_rent_app_soc(json, loan_amt_ratio = 1, score_threshold = 600, max_loan_limit = 10000)
       }
       #---SCORE & RULE COMPUTE END ---#
@@ -955,17 +1169,19 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
     }
   )
 }
-ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan")){
+ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth")){
   tryCatch(
     {
       rule_rent_app_student_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                                         "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_app_society_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio" 
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
       rule_rent_alipay            <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
@@ -975,7 +1191,12 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
+      
+      rule_apv_skip_throuth       <-   c("rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei"
+                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue")
+      rule_alipay_apv_skip_throuth <-  c("rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei")
       
       # ruleFun_list = ruleset$ruleFun_list
       if(product_type == "rent_app_edu"){
@@ -988,6 +1209,10 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
         ruleFun_base(json,rules_config = rule_rent_alipay_app,ruleset) -> rt
       }else if(product_type == "cashloan"){
         ruleFun_base(json,rules_config = rule_cashloan,ruleset) -> rt
+      }else if(product_type == "apv_skip_throuth"){
+        ruleFun_base(json,rules_config = rule_apv_skip_throuth,ruleset) -> rt
+      }else if(product_type == "alipay_apv_skip_throuth"){
+        ruleFun_base(json,rules_config = rule_alipay_apv_skip_throuth,ruleset) -> rt
       }else{
         NULL -> rt
       }
