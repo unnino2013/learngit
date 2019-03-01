@@ -1005,8 +1005,12 @@ scoreFun_base  = function(json){
     RSQLite::dbWriteTable(con, "infos", infos,overwrite = TRUE)
     if(infos$zmscore %in% c('Z1','Z2','Z3','Z4','Z5')){
       rs <- DBI::dbSendQuery(con,str_sql)
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]scoreFun_base: ~m'));flog.info('%s',"walk through str_sql zm model!")
     }else{
       rs <- DBI::dbSendQuery(con,str_sql_huabei)
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]scoreFun_base: ~m'));flog.info('%s',"walk through str_sql_huabei huabei model!")
     }
     infos_w <- dbFetch(rs)
     DBI::dbClearResult(rs)
