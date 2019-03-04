@@ -668,14 +668,15 @@ ruleset$rule_taobao_alipay_shiming <- function(res){
   tryCatch(
     {
       realname <- res$baseInfo$realname 
-      alipay_realname <- res$moxieInfo$alipayInfo$userinfo$user_name
+      # alipay_realname <- res$moxieInfo$alipayInfo$userinfo$user_name # nickname
+      alipay_realname <- res$moxieInfo$alipayInfo$bankinfo$user_name %>% unique()
       # tel <- res$baseInfo$tel
       # alipay_tel <- res$moxieInfo$alipayInfo$userinfo$phone_number
       id_card <- res$baseInfo$id_card
       id_1_18 <- id_card %>% str_sub(1,1) %>% str_c(id_card %>% str_sub(18,18)) 
       alipay_id <- res$moxieInfo$alipayInfo$userinfo$idcard_number
       alipay_id_1_18 <- alipay_id %>% str_sub(1,1) %>% str_c(alipay_id %>% str_sub(18,18))
-      rt <- (realname == alipay_realname) && (id_1_18 == alipay_id_1_18) 
+      rt <- (realname %in% alipay_realname) && (id_1_18 == alipay_id_1_18) 
       rt %>% as.character()
     }
     ,error = function(e){
