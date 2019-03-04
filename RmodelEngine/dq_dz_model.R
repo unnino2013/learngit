@@ -1155,28 +1155,31 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
       rt <- scoreFun_custom(json) 
       decision <- rt$decision
       res <- jsonlite::fromJSON(json);# print log
+
+      #---- denyed customer 200 amt---begin---#
+      decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
+      if(decision$advice_ori == 0) decision$final_amt <- 200
+      #---- denyed customer 200 amt---end-----#
+      
       # log
       cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]cust_info: ~m'));flog.info('%s',cust_info)
-      
-      #---- denyed customer 200 amt---begin---#
-      decision$advice_ori <- decision$advice;decision$advice <- 1
-      if(decision$advice_ori == 0) decision$final_amt <- 200
-      #---- denyed customer 200 amt---end-----#
       decision %>% jsonlite::toJSON(na = 'null')
     }else{
       stop("error:customer infos data must be json!")
     }
   }
   ,error = function(e){
-    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
-                layout.format('[~l] [~t] [~n.~f]scoreFun: ~m'));flog.error('%s',e)
     decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+    
     #---- denyed customer 200 amt---begin---#
-    decision$advice_ori <- decision$advice;decision$advice <- 1
+    decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
     if(decision$advice_ori == 0) decision$final_amt <- 200
     #---- denyed customer 200 amt---end-----#
+    
+    flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                layout.format('[~l] [~t] [~n.~f]scoreFun: ~m'));flog.error('%s',e)
     decision %>% jsonlite::toJSON(na = 'null')
   })
 }
