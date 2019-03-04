@@ -582,12 +582,12 @@ ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
   )
 }
 # huabei can use limit 
-ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 50){
+ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 10){
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
       if(is.null(res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit)) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit is NULL!")
-      res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric() %>% `>`(huabei_amt_canuse_limit) %>% as.character() 
+      res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric() %>% `>=`(huabei_amt_canuse_limit) %>% as.character() 
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
@@ -598,7 +598,7 @@ ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 
 }
 # huabei use ratio
 ruleset$rule_taobao_huabei_amt_use_ratio <- 
-  function(res,huabei_use_ratio_limit = .98){
+  function(res,huabei_use_ratio_limit = .99){
     tryCatch(
       { require(magrittr);require(stringr)
         # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
@@ -606,7 +606,7 @@ ruleset$rule_taobao_huabei_amt_use_ratio <-
         huai_bei_can_use_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% as.numeric()
         huai_bei_limit <- res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric()
         huabei_use_ratio <- 1 - ( huai_bei_can_use_limit / huai_bei_limit)
-        huabei_use_ratio %>% `<`(huabei_use_ratio_limit) %>% as.character() 
+        huabei_use_ratio %>% `<=`(huabei_use_ratio_limit) %>% as.character() 
       },
       error = function(e){
         flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
