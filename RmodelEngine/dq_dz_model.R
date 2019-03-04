@@ -550,12 +550,12 @@ ruleset$rule_taobao_order_succ_recentdeliveraddress_cnt <-
   }
 # success tradedetails count for last 6 months.
 ruleset$rule_taobao_order_succ_cnt <- 
-  function(res,trade_order_cnt_limit = 5){
+  function(res,trade_order_cnt_limit = 3){
     tryCatch(
       { require(magrittr);require(stringr)
         if(is.null(res$moxieInfo$taobaoInfo$tradedetails$trade_createtime)) stop("error:res$moxieInfo$taobaoInfo$tradedetails is NULL!")
         res$moxieInfo$taobaoInfo$tradedetails %>% select(trade_createtime,trade_text,trade_status) %>% 
-          filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>`(trade_order_cnt_limit) %>% as.character() 
+          filter(trade_status == "TRADE_FINISHED") %>% nrow() %>% `>=`(trade_order_cnt_limit) %>% as.character() 
       },
       error = function(e){
         flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
