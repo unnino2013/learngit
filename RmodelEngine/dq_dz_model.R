@@ -763,7 +763,60 @@ ruleset$rule_suanhua_error <- function(res){
       }
     )
   }
+ruleset$rule_suanhua_G1_payday <- function(res){
+  tryCatch(
+    {
+      payday7_limit = 0
+      # payday30_limit = 1
+      if(is.null(res$suanhuaInfo$G1)) stop("error:res$suanhuaInfo$G1 is NULL!")
+      res$suanhuaInfo$G1 %>% jsonlite::fromJSON() -> tmp
+      logic_1 <- tmp$ID_ORG_ONL_PAYDAYLOAN_7 %>% check_num() %>% `<=`(payday7_limit) 
+      # logic_2 <- tmp$ID_ORG_ONL_PAYDAYLOAN_30 %>% check_num() %>% `<=`(payday30_limit)
+      logic_1  %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_suanhua_G1_payday: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 
+ruleset$rule_xinyan <- function(res){
+  tryCatch(
+    {
+      rt <- list(
+        apply__query_sum_count = res$xinyanInfo$result_detail$apply_report_detail$query_sum_count %>% check_num() %>% `>`(21)    # 总查询次数 >21    
+        ,apply__query_org_count = res$xinyanInfo$result_detail$apply_report_detail$query_org_count %>% check_num() %>% `>`(18)    # 查询机构数 >18   
+        ,apply__latest_six_month =  res$xinyanInfo$result_detail$apply_report_detail$latest_six_month %>% check_num() %>% `>`(18)    # 近6个月总查询笔数 >18  
+        ,apply__query_cash_count = res$xinyanInfo$result_detail$apply_report_detail$query_cash_count %>% check_num() %>% `>`(10)    # 查询网络贷款类机构数 >10  
+        ,apply__query_finance_count = res$xinyanInfo$result_detail$apply_report_detail$query_finance_count %>% check_num() %>% `>`(5)    # 查询消费金融类机构数 > 2  
+        ,apply__latest_three_month = res$xinyanInfo$result_detail$apply_report_detail$latest_three_month %>% check_num() %>% `>`(11)    # 近3个月总查询笔数>11  
+        ,behavior__loans_org_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_org_count %>% check_num() %>% `>`(8)    # 贷款机构数>8   
+        ,behavior__loans_cash_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_cash_count %>% check_num() %>% `>`(5)    # 网络贷款类机构数 > 5   
+        ,behavior__history_fail_fee = res$xinyanInfo$result_detail$behavior_report_detail$history_fail_fee %>% check_num() %>% `>`(12)    # 历史贷款机构失败扣款笔数 > 12  
+        ,current__loans_product_count = res$xinyanInfo$result_detail$current_report_detail$loans_product_count %>% check_num() %>% `>`(5)    # 网络贷款类产品数 > 5  
+        ,behavior__loans_score = res$xinyanInfo$result_detail$behavior_report_detail$loans_score %>% check_num() %>% `<=`(493)    # 贷款行为分 <= 493  
+        ,behavior__loans_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_count %>% check_num() %>% `>`(21)    # 贷款放款总订单数 >21   
+        ,behavior__loans_overdue_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_overdue_count %>% check_num() %>% `>`(2)    # 贷款逾期订单数M0plus > 2  
+        ,behavior__consfin_org_count = res$xinyanInfo$result_detail$behavior_report_detail$consfin_org_count %>% check_num() %>% `>`(4)    # 消费金融类机构数 > 4 
+      )
+      if(which(is.na(rt)) %>% length()){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_xinyan: ~m'));flog.error('%s',rt %>% jsonlite::toJSON(na = "null"))
+      }
+      logic_rt <- !sum(rt %>% unlist(),na.rm = T)
+      logic_rt %>% as.character()
+      
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_xinyan: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+  
+}
 edu_level_check <- function(edu_level) edu_level %in% c('专科','本科','硕士研究生','博士研究生') %>% sum(na.rm = TRUE) # consider mult. edu.
 edu_type_chenck <- function(edu_type) edu_type %in% c('普通','研究生','普通高等教育') %>% sum(na.rm = TRUE)
 edu_form_chenck <- function(edu_form) edu_form %in% c('全日制','普通全日制') %>% sum(na.rm = TRUE)
@@ -1209,20 +1262,20 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
 ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth")){
   tryCatch(
     {
-      rule_rent_app_student_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
+      rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                                         "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_app_society_state <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
+      rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio" 
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_rent_alipay            <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
-      rule_rent_alipay_app        <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
+      rule_rent_alipay            <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore")
+      rule_rent_alipay_app        <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_txl")
       
       rule_cashloan               <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
@@ -1231,9 +1284,9 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio")
       
-      rule_apv_skip_throuth       <-   c("rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei"
+      rule_apv_skip_throuth       <-   c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei"
                                          ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue")
-      rule_alipay_apv_skip_throuth <-  c("rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei")
+      rule_alipay_apv_skip_throuth <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_sanyaosu","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei")
       
       # ruleFun_list = ruleset$ruleFun_list
       if(product_type == "rent_app_edu"){
