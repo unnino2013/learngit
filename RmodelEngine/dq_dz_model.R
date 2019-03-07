@@ -752,7 +752,7 @@ ruleset$rule_suanhua_error <- function(res){
     tryCatch(
       { 
         # suanhua
-        if(is.null(res$suanhuaInfo) || (!length(res$suanhuaInfo))) stop("error:res$xinyanInfo is NULL!")
+        if(is.null(res$suanhuaInfo) || (!length(res$suanhuaInfo))) stop("error:res$suanhuaInfo is NULL!")
         if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
         "TRUE"
       },
