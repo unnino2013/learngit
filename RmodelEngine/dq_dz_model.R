@@ -880,15 +880,20 @@ extract_scorefeatures_from_list <- function(res){
         age = res$baseInfo$age  %>% check_num(),
         sex = res$baseInfo$sex %>% check_char(),
         zaiwang = res$baseInfo$zaiwang %>% check_char(),
-        query_sum_count = xy_result_detail$apply_report_detail$query_sum_count  %>% check_num(),
-        loans_cash_count = xy_result_detail$behavior_report_detail$loans_cash_count  %>% check_num(),
-        history_fail_fee = xy_result_detail$behavior_report_detail$history_fail_fee  %>% check_num(),
+        # xy
+        query_sum_count = xy_result_detail$apply_report_detail$query_sum_count  %>% check_num(), # 总查询次数
+        loans_cash_count = xy_result_detail$behavior_report_detail$loans_cash_count  %>% check_num(), # 网络贷款类机构数
+        history_fail_fee = xy_result_detail$behavior_report_detail$history_fail_fee  %>% check_num(), # 历史贷款机构失败扣款笔数
+        
+        latest_three_month = xy_result_detail$apply_report_detail$latest_three_month %>% check_num(),
+        loans_credibility = xy_result_detail$behavior_report_detail$loans_credibility %>% check_num(),
+        loans_score = xy_result_detail$behavior_report_detail$loans_score %>% check_num(), # 贷款行为分
+        
+        loans_count = xy_result_detail$behavior_report_detail$loans_count %>% check_num(), # 贷款放款总订单数 
+        latest_one_month_suc = xy_result_detail$behavior_report_detail$latest_one_month_suc %>% check_num(), # 近1个月贷款机构成功扣款笔数
         # dz
         zm_jianmian = res$baseInfo$zm_jianmian  %>% check_num(),
         real_mianya_ratio = res$baseInfo$real_mianya_ratio  %>% check_num(),
-        latest_three_month = xy_result_detail$apply_report_detail$latest_three_month %>% check_num(),
-        loans_score = xy_result_detail$behavior_report_detail$loans_score %>% check_num(),
-        loans_credibility = xy_result_detail$behavior_report_detail$loans_credibility %>% check_num(),
         
         # taobao jiebei huabei zhimafen
         taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num(),
@@ -905,8 +910,17 @@ extract_scorefeatures_from_list <- function(res){
         first_ordertime = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime  %>% check_char(),
         account_auth = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$account_auth  %>% check_char(),
         taobao_vip_level = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_level  %>% check_char(),
-        taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char()
-        # check socitety
+        taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char(),
+        # ZR
+        zr_score = res$zrobotInfo$zrobotCredit$score %>% check_num(),
+        zr_binding_phones = res$zrobotInfo$antiFraud$binding_phones %>% check_num(),
+        zr_overdue_status_12m = res$zrobotInfo$financalBehavior$overdue_status_12m %>% check_num() , 
+        zr_sn_order1_blacklist_contacts_cnt = res$zrobotInfo$antiFraud$sn_order1_blacklist_contacts_cnt %>% check_num() , 
+        zr_performance_index = res$zrobotInfo$zrobotCredit$performanceIndex %>% check_num() , 
+        zr_ecommerce_account_history = res$zrobotInfo$zrobotCredit$ecommerceAccountHistory %>% check_num(),
+        zr_org_cnt_recent_60_days = res$zrobotInfo$antiFraud$org_cnt_recent_60_days %>% check_num(),
+        zr_overdue_status_3m = res$zrobotInfo$financalBehavior$overdue_status_3m %>% check_num(),
+        zr_risk_period_consuming = res$zrobotInfo$zrobotCredit$riskPeriodConsuming %>% check_num()
       )
       infos 
     },
