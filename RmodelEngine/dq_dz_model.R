@@ -861,63 +861,75 @@ edu_status_check <- function(edu_status) edu_status  %in% c('在籍注册学籍'
 edu_level_max_level_check <- function(edu_level) edu_level %>% car_recode("'专科' = 1;'本科' = 2;'硕士研究生' = 3;'博士研究生' = 4;else = 0") %>% max(na.rm = TRUE)
 
 
-
+extract_scorefeatures_from_list <- function(res){
+  tryCatch(
+    {
+      if(!is.null(res$xinyanInfo$data$result_detail)){
+        xy_result_detail <- res$xinyanInfo$data$result_detail
+      }else if(!is.null(res$xinyanInfo$result_detail)){
+        xy_result_detail <- res$xinyanInfo$result_detail
+      }else{
+        xy_result_detail <- NULL
+      }
+      #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--end--#
+      infos <- data_frame(
+        # dq
+        realname = res$baseInfo$realname %>% check_char(),
+        id_card = res$baseInfo$id_card %>% check_char(),
+        zm_zmscore = res$baseInfo$zmscore %>% check_char(),
+        age = res$baseInfo$age  %>% check_num(),
+        sex = res$baseInfo$sex %>% check_char(),
+        zaiwang = res$baseInfo$zaiwang %>% check_char(),
+        query_sum_count = xy_result_detail$apply_report_detail$query_sum_count  %>% check_num(),
+        loans_cash_count = xy_result_detail$behavior_report_detail$loans_cash_count  %>% check_num(),
+        history_fail_fee = xy_result_detail$behavior_report_detail$history_fail_fee  %>% check_num(),
+        # dz
+        zm_jianmian = res$baseInfo$zm_jianmian  %>% check_num(),
+        real_mianya_ratio = res$baseInfo$real_mianya_ratio  %>% check_num(),
+        latest_three_month = xy_result_detail$apply_report_detail$latest_three_month %>% check_num(),
+        loans_score = xy_result_detail$behavior_report_detail$loans_score %>% check_num(),
+        loans_credibility = xy_result_detail$behavior_report_detail$loans_credibility %>% check_num(),
+        
+        # taobao jiebei huabei zhimafen
+        taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num(),
+        taobao_jiebei_amount = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_jiebei_amount %>% check_num(), 
+        taobao_jiebie_available_amount = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_jiebie_available_amount %>% check_num(),
+        huai_bei_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num(),
+        huai_bei_can_use_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% check_num(),
+        # zhifubaomianya & taobao scpyder jianrong
+        taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char(),
+        zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore),
+        
+        # taobao basic_info
+        tao_score = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$tao_score  %>% check_num(),
+        first_ordertime = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime  %>% check_char(),
+        account_auth = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$account_auth  %>% check_char(),
+        taobao_vip_level = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_level  %>% check_char(),
+        taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char()
+        # check socitety
+      )
+      infos 
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]extract_scorefeatures_from_list: ~m'));flog.error('%s',e)
+      NULL
+    }
+  )
+}
 
 parse_json_2_score_features <- function(json){
-  if(jsonlite::validate(json)) {
-    res = jsonlite::fromJSON(json)
-  }else{
-    res = NULL
-  }
-  # suanhua
-  # if(is.null(res$suanhuaInfo$STAN_FRD_LEVEL)) stop("error:res$suanhuaInfo is NULL!")
-  # #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--begin--#
-  # if(is.null(res$xinyanInfo$trans_id) && is.null(res$xinyanInfo$data$trans_id)) stop("error:res$xinyanInfo is NULL!")
-  if(!is.null(res$xinyanInfo$data$result_detail)){
-    xy_result_detail <- res$xinyanInfo$data$result_detail
-  }else if(!is.null(res$xinyanInfo$result_detail)){
-    xy_result_detail <- res$xinyanInfo$result_detail
-  }else{
-    xy_result_detail <- NULL
-  }
-  #--jianrong res$xinyanInfo$data$result_detail and res$xinyanInfo$result_detail.--end--#
-  infos <- data_frame(
-    # dq
-    realname = res$baseInfo$realname %>% check_char(),
-    id_card = res$baseInfo$id_card %>% check_char(),
-    zm_zmscore = res$baseInfo$zmscore %>% check_char(),
-    age = res$baseInfo$age  %>% check_num(),
-    sex = res$baseInfo$sex %>% check_char(),
-    zaiwang = res$baseInfo$zaiwang %>% check_char(),
-    query_sum_count = xy_result_detail$apply_report_detail$query_sum_count  %>% check_num(),
-    loans_cash_count = xy_result_detail$behavior_report_detail$loans_cash_count  %>% check_num(),
-    history_fail_fee = xy_result_detail$behavior_report_detail$history_fail_fee  %>% check_num(),
-    # dz
-    zm_jianmian = res$baseInfo$zm_jianmian  %>% check_num(),
-    real_mianya_ratio = res$baseInfo$real_mianya_ratio  %>% check_num(),
-    latest_three_month = xy_result_detail$apply_report_detail$latest_three_month %>% check_num(),
-    loans_score = xy_result_detail$behavior_report_detail$loans_score %>% check_num(),
-    loans_credibility = xy_result_detail$behavior_report_detail$loans_credibility %>% check_num(),
-    
-    # taobao jiebei huabei zhimafen
-    taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num(),
-    taobao_jiebei_amount = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_jiebei_amount %>% check_num(), 
-    taobao_jiebie_available_amount = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_jiebie_available_amount %>% check_num(),
-    huai_bei_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num(),
-    huai_bei_can_use_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% check_num(),
-    # zhifubaomianya & taobao scpyder jianrong
-    taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char(),
-    zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore),
-    
-    # taobao basic_info
-    tao_score = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$tao_score  %>% check_num(),
-    first_ordertime = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime  %>% check_char(),
-    account_auth = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$account_auth  %>% check_char(),
-    taobao_vip_level = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_level  %>% check_char(),
-    taobao_vip_count = res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$taobao_vip_count    %>% check_char()
-    # check socitety
+  tryCatch(
+    {
+      res = jsonlite::fromJSON(json)
+      extract_scorefeatures_from_list(res)
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]parse_json_2_score_features: ~m'));flog.error('%s',e)
+      NULL
+    }
   )
-  infos 
 }
 scoreFun_base  = function(json){
   #----str_sql-----
