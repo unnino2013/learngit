@@ -1244,7 +1244,17 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
       rt <- scoreFun_custom(json) 
       decision <- rt$decision
       res <- jsonlite::fromJSON(json);# print log
-
+      #---- whitelist---begin---#
+      if(file.exists('/usr/src/white_list.txt')){
+        white_list <- readLines('/usr/src/white_list.txt')
+        if(res$baseInfo$id_card %in% white_list){
+          decision$score <- 111
+          decision$advice <- 1;
+          decision$final_amt <- 100;
+          decision$test_status <- 1;
+        }
+      }
+      #---- whitelist---end-----#
       #---- denyed customer 200 amt---begin---#
       decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
       if(decision$advice_ori == 0) decision$final_amt <- 200
