@@ -1574,6 +1574,15 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
       rt <- scoreFun_custom(json) 
       decision <- rt$decision
       res <- jsonlite::fromJSON(json);# print log
+      #-----all 100% yajin apv_skip---begin--#
+      alipay_id <- res$baseInfo$is_alipay %>% check_NA() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
+      credit_cost <- res$baseInfo$credit_cost %>% check_num()
+      if(alipay_id && !is.na(credit_cost) && credit_cost <= 200){
+        decision$advice <- 1
+        decision$final_amt <- 200
+        decision$all_yajin_status <- 1
+      }
+      #-----all 100% yajin apv_skip---end----#
       #---- whitelist---begin---#
       if(file.exists('/usr/src/white_list.txt')){
         white_list <- readLines('/usr/src/white_list.txt')
