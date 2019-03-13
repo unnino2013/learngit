@@ -1590,10 +1590,21 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
           decision$score <- 111
           decision$advice <- 1;
           decision$final_amt <- 100;
-          decision$test_status <- 1;
+          decision$white_status <- 1;
         }
       }
       #---- whitelist---end-----#
+      #---- blacklist---begin---#
+      if(file.exists('/usr/src/black_list.txt')){
+        black_list <- readLines('/usr/src/black_list.txt')
+        if(res$baseInfo$id_card %in% black_list){
+          decision$score <- 119
+          decision$advice <- 0;
+          decision$final_amt <- 100;
+          decision$black_status <- 1;
+        }
+      }
+      #---- blacklist---end-----#
       #---- denyed customer 200 amt---begin---#
       decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
       if(decision$advice_ori == 0) decision$final_amt <- 200
