@@ -1605,10 +1605,40 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
         }
       }
       #---- blacklist---end-----#
-      #---- denyed customer 200 amt---begin---#
-      decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
-      if(decision$advice_ori == 0) decision$final_amt <- 200
-      #---- denyed customer 200 amt---end-----#
+      #-----dongdongxinyong & dongdong anti_fraud & alipay---start-----#
+      alipay_id <- res$baseInfo$is_alipay %>% check_NA() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
+      dd_credit_id <- (res$baseInfo$is_app_society || res$baseInfo$is_app_student) %>% check_num() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
+      anti_fraud <- res$baseInfo$anti_fraud %>% check_num() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
+      if(dd_credit_id){
+        #---- denyed customer 200 amt---begin---#
+        if(decision$advice == 0){
+          decision$advice <- 1
+          decision$final_amt <- 200
+          decision$advice_ori <- 1
+          decision$final_amt_ori <- 200
+          decision$alipay_id <- alipay_id
+          decision$dd_credit_id <- dd_credit_id
+          decision$anti_fraud <- anti_fraud
+        }
+        #---- denyed customer 200 amt---end-----#
+      }else if(alipay_id){
+        #---- denyed customer 200 amt---begin---#
+        decision$advice_ori <- decision$advice;
+        if(decision$advice_ori == 0) {
+          decision$advice <- 1;
+          decision$final_amt <- 200
+          decision$final_amt_ori <- decision$final_amt
+          decision$alipay_id <- alipay_id
+          decision$dd_credit_id <- dd_credit_id
+          decision$anti_fraud <- anti_fraud
+        }
+        #---- denyed customer 200 amt---end-----#
+      }else{
+        decision$final_amt_ori <- decision$final_amt
+        decision$advice_ori <- decision$advice;
+      }
+      #-----dongdongxinyong & dongdong anti_fraud & alipay---end-----#
+
       
       # log
       cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
