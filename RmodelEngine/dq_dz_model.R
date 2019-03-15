@@ -1619,6 +1619,9 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
           decision$alipay_id <- alipay_id
           decision$dd_credit_id <- dd_credit_id
           decision$anti_fraud <- anti_fraud
+        }else if(decision$advice == 1){
+          decision$final_amt_ori <- decision$final_amt
+          decision$advice_ori <- decision$advice;
         }
         #---- denyed customer 200 amt---end-----#
       }else if(alipay_id){
@@ -1631,6 +1634,9 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
           decision$alipay_id <- alipay_id
           decision$dd_credit_id <- dd_credit_id
           decision$anti_fraud <- anti_fraud
+        }else{
+          decision$final_amt_ori <- decision$final_amt
+          decision$advice_ori <- decision$advice;
         }
         #---- denyed customer 200 amt---end-----#
       }else{
