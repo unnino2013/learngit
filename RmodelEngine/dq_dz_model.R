@@ -1679,10 +1679,10 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio","rule_zrobot_sc_zrxy_zm")
       
-      rule_apv_skip_throuth       <-   c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei"
+      rule_apv_skip_throuth       <-   c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_apv_skip_through_of_zmscore_huabei"
                                          ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue"
                                          ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
-      rule_alipay_apv_skip_throuth <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_zaiwang","rule_apv_skip_through_of_zmscore_huabei","rule_zrobot_sc_zrxy_zm")
+      rule_alipay_apv_skip_throuth <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_apv_skip_through_of_zmscore_huabei","rule_zrobot_sc_zrxy_zm")
       
       # ruleFun_list = ruleset$ruleFun_list
       if(product_type == "rent_app_edu"){
