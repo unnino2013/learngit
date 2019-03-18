@@ -1089,7 +1089,7 @@ ruleset$rule_zrobot_sc_zrxy_zm <- function(res,limit = 450){
 ruleset$rule_zrobot_sn_order1_blacklist_contacts_cnt <- function(res){
   tryCatch(
     {
-      if(is.null(res$zrobotInfo$antiFraud$sn_order1_blacklist_contacts_cnt)){
+      if(is.null(res$zrobotInfo$antiFraud$sn_order1_blacklist_contacts_cnt) || res$zrobotInfo$antiFraud$sn_order1_blacklist_contacts_cnt == ""){
         rt <- "TRUE"
       }else{
         rt <- res$zrobotInfo$antiFraud$sn_order1_blacklist_contacts_cnt %>% check_num() %>% `<=`(5)
