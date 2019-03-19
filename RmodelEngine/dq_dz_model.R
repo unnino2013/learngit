@@ -702,6 +702,35 @@ ruleset$rule_taobao_alipay_shiming <- function(res){
     }
   )
 }
+ruleset$rule_taobao_alipayinfo_bankcard_cnt <- function(res,bankcard_cnt_limit = 2){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
+      if(is.null(res$moxieInfo$alipayInfo$bankinfo$card_number)) stop("error:res$moxieInfo$alipayInfo$bankinfo$card_number is NULL!")
+      res$moxieInfo$alipayInfo$bankinfo$card_number %>% unique() %>% length()  %>% `>=`(bankcard_cnt_limit) %>% as.character() 
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipayinfo_bankcard_cnt: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
+ruleset$rule_taobao_alipayinfo_deliver_tel <- function(res,tel_cnt_limit = 2){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
+      if(is.null(res$moxieInfo$alipayInfo$alipaydeliveraddresses)) stop("error:res$moxieInfo$alipayInfo$alipaydeliveraddresses is NULL!")
+      res$moxieInfo$alipayInfo$alipaydeliveraddresses$phone_number %>% unique() %>% length()  %>% `>=`(tel_cnt_limit) %>% as.character() 
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipayinfo_deliver_tel: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 
 ruleset$rule_taobao_alipayinfo_error <- function(res){
   tryCatch(
@@ -1660,12 +1689,12 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
     {
       rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
                                         "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
-                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
                                         ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
       
       rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl"
-                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days"
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
                                         ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
       
