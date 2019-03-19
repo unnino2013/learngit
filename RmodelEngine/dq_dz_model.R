@@ -598,7 +598,7 @@ ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
   )
 }
 # huabei can use limit 
-ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 10){
+ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 0.5){
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
@@ -614,7 +614,7 @@ ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 
 }
 # huabei use ratio
 ruleset$rule_taobao_huabei_amt_use_ratio <- 
-  function(res,huabei_use_ratio_limit = .99){
+  function(res,huabei_use_ratio_limit = .9999){
     tryCatch(
       { require(magrittr);require(stringr)
         # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
