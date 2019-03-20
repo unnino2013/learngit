@@ -702,7 +702,7 @@ ruleset$rule_taobao_alipay_shiming <- function(res){
     }
   )
 }
-ruleset$rule_taobao_alipayinfo_bankcard_cnt <- function(res,bankcard_cnt_limit = 2){
+ruleset$rule_taobao_alipayinfo_bankcard_cnt <- function(res,bankcard_cnt_limit = 1){
   tryCatch(
     { require(magrittr);require(stringr)
       # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
@@ -717,7 +717,7 @@ ruleset$rule_taobao_alipayinfo_bankcard_cnt <- function(res,bankcard_cnt_limit =
   )
 }
 
-ruleset$rule_taobao_alipayinfo_deliver_tel <- function(res,tel_cnt_limit = 2){
+ruleset$rule_taobao_alipayinfo_deliver_tel <- function(res,tel_cnt_limit = 1){
   tryCatch(
     { require(magrittr);require(stringr)
       # trade order successed. merge tradedetails and recentdeliveraddress dataframe.
