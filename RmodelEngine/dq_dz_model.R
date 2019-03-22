@@ -1159,10 +1159,10 @@ ruleset$rule_xinyan <- function(res){
         ,apply__query_org_count = res$xinyanInfo$result_detail$apply_report_detail$query_org_count %>% check_num() %>% `>`(18)    # 查询机构数 >18   
         ,apply__latest_six_month =  res$xinyanInfo$result_detail$apply_report_detail$latest_six_month %>% check_num() %>% `>`(18)    # 近6个月总查询笔数 >18  
         ,apply__query_cash_count = res$xinyanInfo$result_detail$apply_report_detail$query_cash_count %>% check_num() %>% `>`(10)    # 查询网络贷款类机构数 >10  
-        ,apply__query_finance_count = res$xinyanInfo$result_detail$apply_report_detail$query_finance_count %>% check_num() %>% `>`(5)    # 查询消费金融类机构数 > 2  
+        ,apply__query_finance_count = res$xinyanInfo$result_detail$apply_report_detail$query_finance_count %>% check_num() %>% `>`(10)    # 查询消费金融类机构数 > 2  
         ,apply__latest_three_month = res$xinyanInfo$result_detail$apply_report_detail$latest_three_month %>% check_num() %>% `>`(11)    # 近3个月总查询笔数>11  
         ,behavior__loans_org_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_org_count %>% check_num() %>% `>`(8)    # 贷款机构数>8   
-        ,behavior__loans_cash_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_cash_count %>% check_num() %>% `>`(5)    # 网络贷款类机构数 > 5   
+        ,behavior__loans_cash_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_cash_count %>% check_num() %>% `>`(6)    # 网络贷款类机构数 > 5   
         ,behavior__history_fail_fee = res$xinyanInfo$result_detail$behavior_report_detail$history_fail_fee %>% check_num() %>% `>`(12)    # 历史贷款机构失败扣款笔数 > 12  
         ,current__loans_product_count = res$xinyanInfo$result_detail$current_report_detail$loans_product_count %>% check_num() %>% `>`(5)    # 网络贷款类产品数 > 5  
         ,behavior__loans_score = res$xinyanInfo$result_detail$behavior_report_detail$loans_score %>% check_num() %>% `<=`(493)    # 贷款行为分 <= 493  
