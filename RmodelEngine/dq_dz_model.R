@@ -1603,15 +1603,6 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
       rt <- scoreFun_custom(json) 
       decision <- rt$decision
       res <- jsonlite::fromJSON(json);# print log
-      #-----all 100% yajin apv_skip---begin--#
-      alipay_id <- res$baseInfo$is_alipay %>% check_NA() %>% stringr::str_to_upper() %in% c("1","TRUE","True")
-      credit_cost <- res$baseInfo$credit_cost %>% check_num()
-      if(alipay_id && !is.na(credit_cost) && credit_cost <= 200){
-        decision$advice <- 1
-        decision$final_amt <- 200
-        decision$all_yajin_status <- 1
-      }
-      #-----all 100% yajin apv_skip---end----#
       #---- whitelist---begin---#
       if(file.exists('/usr/src/white_list.txt')){
         white_list <- readLines('/usr/src/white_list.txt')
@@ -1639,6 +1630,18 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
       decision$advice_ori <- decision$advice;
       decision$final_amt_ori <- decision$final_amt
       #--anti-fraud--end-#
+      
+      #-----all 100% yajin apv_skip---begin--#
+      # anti_fraut take advice_ori
+      real_mianya_ratio <- res$baseInfo$real_mianya_ratio %>% check_NA()
+      if(!is.na(real_mianya_ratio) && real_mianya_ratio == 0){
+        decision$advice_ori <- 1
+        decision$final_amt <- 0
+        decision$final_amt_ori <- 0
+        decision$all_yajin_status <- 1
+      }
+      #-----all 100% yajin apv_skip---end----#
+      
       # log
       cust_info <- list(baseInfo = res$baseInfo,decision = decision) %>% jsonlite::toJSON(null=NULL)
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
