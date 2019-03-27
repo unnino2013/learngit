@@ -598,7 +598,7 @@ ruleset$rule_taobao_huabei_amt <- function(res,huabei_amt_limit = 200){
   )
 }
 # huabei can use limit 
-ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 0.5){
+ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 0){
   tryCatch(
     { require(magrittr);require(stringr)
       # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
@@ -614,7 +614,7 @@ ruleset$rule_taobao_huabei_amt_canuse <- function(res,huabei_amt_canuse_limit = 
 }
 # huabei use ratio
 ruleset$rule_taobao_huabei_amt_use_ratio <- 
-  function(res,huabei_use_ratio_limit = .9999){
+  function(res,huabei_use_ratio_limit = 1){
     tryCatch(
       { require(magrittr);require(stringr)
         # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
@@ -1155,8 +1155,8 @@ ruleset$rule_xinyan <- function(res){
   tryCatch(
     {
       rt <- list(
-        apply__query_sum_count = res$xinyanInfo$result_detail$apply_report_detail$query_sum_count %>% check_num() %>% `>`(21)    # 总查询次数 >21    
-        ,apply__query_org_count = res$xinyanInfo$result_detail$apply_report_detail$query_org_count %>% check_num() %>% `>`(18)    # 查询机构数 >18   
+        apply__query_sum_count = res$xinyanInfo$result_detail$apply_report_detail$query_sum_count %>% check_num() %>% `>`(35)    # 总查询次数 >21    
+        ,apply__query_org_count = res$xinyanInfo$result_detail$apply_report_detail$query_org_count %>% check_num() %>% `>`(35)    # 查询机构数 >18   
         ,apply__latest_six_month =  res$xinyanInfo$result_detail$apply_report_detail$latest_six_month %>% check_num() %>% `>`(18)    # 近6个月总查询笔数 >18  
         ,apply__query_cash_count = res$xinyanInfo$result_detail$apply_report_detail$query_cash_count %>% check_num() %>% `>`(10)    # 查询网络贷款类机构数 >10  
         ,apply__query_finance_count = res$xinyanInfo$result_detail$apply_report_detail$query_finance_count %>% check_num() %>% `>`(10)    # 查询消费金融类机构数 > 2  
