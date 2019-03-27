@@ -13,7 +13,7 @@ library(magrittr)
 library(lubridate)
 library(hms)
 library(futile.logger)
-# x %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA")
+# x %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA")
 
 check_num <- function(x){
   x <- as.numeric(x)
@@ -108,7 +108,7 @@ ruleset$rule_zmscore <- function(res){
       # zhifubaomianya & taobao scpyder jianrong
       zm_zmscore = res$baseInfo$zmscore %>% check_char()
       taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
-      taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
+      taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA") %>% check_char()
       zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
       if(check_null_NA(zmscore)) return('ERROR')
       zmscore %in% c('Z1','Z2','Z3','Z4')  %>% as.character()
@@ -642,7 +642,7 @@ apv_skip_through_of_zmscore_huabei <- function(res){
       # zhifubaomianya & taobao scpyder jianrong
       zm_zmscore = res$baseInfo$zmscore %>% check_char()
       taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
-      taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char()
+      taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA") %>% check_char()
       zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
       zmscore_over_700 <- zmscore %in% c('Z1','Z2') 
       if(is.null(huabei_overdue) || is.na(huabei_overdue)) huabei_overdue <- FALSE
@@ -1235,7 +1235,7 @@ extract_scorefeatures_from_list <- function(res){
         huai_bei_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num(),
         huai_bei_can_use_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_can_use_limit %>% check_num(),
         # zhifubaomianya & taobao scpyder jianrong
-        taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:600 = 'Z5';601:650 = 'Z4';651:700 = 'Z3';701:750 = 'Z2';751:Inf = 'Z1';else=NA") %>% check_char(),
+        taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA") %>% check_char(),
         zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore),
         
         # taobao basic_info
