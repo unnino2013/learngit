@@ -1586,7 +1586,7 @@ scoreFun_custom <- function(json){
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]scoreFun_custom: ~m'));flog.error('%s',e)
-      decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
+      decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0,advice_ori=0,final_amt_ori=0,error_status = 1) 
       list(decision = decision)
     }
   )
@@ -1652,12 +1652,7 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
     }
   }
   ,error = function(e){
-    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0) 
-    
-    #---- denyed customer 200 amt---begin---#
-    decision$advice_ori <- decision$advice;decision$advice <- 1;decision$final_amt_ori <- decision$final_amt
-    if(decision$advice_ori == 0) decision$final_amt <- 200
-    #---- denyed customer 200 amt---end-----#
+    decision <- data_frame(score = 0,advice =0,advice_amt=0,final_amt=0,advice_ori=0,final_amt_ori=0,error_status = 1) 
     
     flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                 layout.format('[~l] [~t] [~n.~f]scoreFun: ~m'));flog.error('%s',e)
