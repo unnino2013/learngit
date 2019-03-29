@@ -273,6 +273,164 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
   )
 }
 
+ruleset$rule_zmscore_edu <- function(res){
+  tryCatch(
+    {
+      # zhifubaomianya & taobao scpyder jianrong
+      zm_zmscore = res$baseInfo$zmscore %>% check_char()
+      taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
+      taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA") %>% check_char()
+      zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
+      if(check_null_NA(zmscore)) return('TRUE')
+      if(!zmscore %in% c('Z1','Z2','Z3','Z4','Z5')) return('TRUE')
+      zmscore %in% c('Z1','Z2','Z3','Z4')  %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_zmscore_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
+ruleset$rule_xinyan_edu <- function(res){
+  tryCatch(
+    {
+      rt <- list(
+        apply__query_sum_count = res$xinyanInfo$result_detail$apply_report_detail$query_sum_count %>% check_num() %>% `>`(15)    # 总查询次数 >21    
+        ,apply__query_org_count = res$xinyanInfo$result_detail$apply_report_detail$query_org_count %>% check_num() %>% `>`(10)    # 查询机构数 >18   
+        ,apply__latest_six_month =  res$xinyanInfo$result_detail$apply_report_detail$latest_six_month %>% check_num() %>% `>`(18)    # 近6个月总查询笔数 >18  
+        ,apply__query_cash_count = res$xinyanInfo$result_detail$apply_report_detail$query_cash_count %>% check_num() %>% `>`(10)    # 查询网络贷款类机构数 >10  
+        ,apply__query_finance_count = res$xinyanInfo$result_detail$apply_report_detail$query_finance_count %>% check_num() %>% `>`(5)    # 查询消费金融类机构数 > 2  
+        ,apply__latest_three_month = res$xinyanInfo$result_detail$apply_report_detail$latest_three_month %>% check_num() %>% `>`(11)    # 近3个月总查询笔数>11  
+        ,behavior__loans_org_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_org_count %>% check_num() %>% `>`(2)    # 贷款机构数>8   
+        ,behavior__loans_cash_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_cash_count %>% check_num() %>% `>`(2)    # 网络贷款类机构数 > 5   
+        ,behavior__history_fail_fee = res$xinyanInfo$result_detail$behavior_report_detail$history_fail_fee %>% check_num() %>% `>`(10)    # 历史贷款机构失败扣款笔数 > 12  
+        ,current__loans_product_count = res$xinyanInfo$result_detail$current_report_detail$loans_product_count %>% check_num() %>% `>`(2)    # 网络贷款类产品数 > 5  
+        ,behavior__loans_score = res$xinyanInfo$result_detail$behavior_report_detail$loans_score %>% check_num() %>% `<=`(493)    # 贷款行为分 <= 493  
+        ,behavior__loans_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_count %>% check_num() %>% `>`(5)    # 贷款放款总订单数 >21   
+        ,behavior__loans_overdue_count = res$xinyanInfo$result_detail$behavior_report_detail$loans_overdue_count %>% check_num() %>% `>`(2)    # 贷款逾期订单数M0plus > 2  
+        ,behavior__consfin_org_count = res$xinyanInfo$result_detail$behavior_report_detail$consfin_org_count %>% check_num() %>% `>`(2)    # 消费金融类机构数 > 4 
+      )
+      if(which(is.na(rt)) %>% length()){
+        flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                    layout.format('[~l] [~t] [~n.~f]rule_xinyan_edu: ~m'));flog.info('%s',rt %>% jsonlite::toJSON(na = "null"))
+      }
+      logic_rt <- !sum(rt %>% unlist(),na.rm = T)
+      logic_rt %>% as.character()
+      
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_xinyan_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+  
+}
+
+ruleset$rule_taobao_his_days_edu <- function(res,taobao_his_days_limit = 30){
+  tryCatch(
+    {
+      if(is.null(res$moxieInfo$taobaoReport)) stop('ERROR:res$moxieInfo$taobaoReport is null.')
+      taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_NA()
+      taobao_his_days <- taobao_first_ordertime %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
+      if(is.null(taobao_his_days) || is.na(taobao_his_days)) stop('ERROR:taobao_his_days is null.')
+      (taobao_his_days > taobao_his_days_limit) %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_his_days_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+ruleset$rule_taobao_alipay_his_days_edu <- function(res,taobao_alipay_his_days_limit = 30){
+  tryCatch(
+    {
+      if(is.null(res$moxieInfo$taobaoReport)) stop('ERROR:res$moxieInfo$taobaoReport is null.')
+      alipay_register_time <- res$moxieInfo$alipayInfo$userinfo$register_time %>% check_NA()
+      taobao_alipay_his_days <- alipay_register_time %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
+      if(is.null(taobao_alipay_his_days) || is.na(taobao_alipay_his_days)) stop('ERROR:taobao_alipay_his_days is null.')
+      (taobao_alipay_his_days > taobao_alipay_his_days_limit) %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_alipay_his_days_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+
+ruleset$rule_taobao_address_edu <- function(res){
+  tryCatch(
+    {
+      if(is.null(res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address)) stop("error:res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address is NULL!")
+      if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$school_name)) stop("error:res$moxieInfo$xuexinInfo$studentInfo_list$school_name is NULL!")
+      res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address %>% unique() %>% str_detect(res$moxieInfo$xuexinInfo$studentInfo_list$school_name) %>% any() %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_address_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+ruleset$rule_taobao_huabei_amt_edu <- function(res,huabei_amt_limit = 20){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # taobaoReport huabei unit yuan;and taobaoInfo huabei unit fen. version of moxie is taobaoxinxiV6 taobaobaogaoV4.
+      if(is.null(res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit)) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit is NULL!")
+      res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% as.numeric() %>% `>`(huabei_amt_limit) %>% as.character() 
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_taobao_huabei_amt_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
+ruleset$rule_txl_edu <- function(res,tel = 'tel',name = 'name'){
+  tryCatch(
+    { require(magrittr);require(stringr)
+      # 亲属联系人
+      qinshu_dict <- c("爸","父","妈","母","爹","妹妹","姐姐","哥哥","弟弟","爷爷","奶奶","外公","外婆","姥姥","姥爷","老公","老婆","媳妇",
+                       "爱人","丈夫","舅","叔","婶","姑","表妹","表弟","表姐","表哥","宝贝","堂哥","堂姐",
+                       "堂妹","堂弟","儿子","女儿","姨","伯","乖乖","宝宝")
+      
+      
+      # 敏感联系人包含关键字 
+      black_dict <- c("套现","贷款","信用卡代办","中介","口子","借钱","黑户","贷","贷款","中介","黑户","白户","白条","信用卡","口子","分期",
+                      "金服","金融","财富","理财","融资","套现","提额","网贷","还款","还钱","借钱","借款","代还","pos机","催收","同行","抵押",
+                      "无抵押","高利贷","信用","二手车","垫养","呆账","欠款","欠钱","赌博")
+      edu_dict <- c("辅导","老师","班主任","班长","同学")
+      #-- configs start---
+      validate_limit = 20;
+      qingshu_limit = 1;
+      black_limit = 10
+      edu_limit = 2
+      #-- configs end---
+      # if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
+      txl <- res$tongxunluInfo
+      # if(is.null(txl) || is.na(txl) || (txl == '')) return('TRUE')
+      
+      txl[,tel] <- txl[,tel] %>% str_remove_all("(\\s)|-|(\\+86)")
+      index = (nchar(txl[,tel]) == 11 & txl[,tel] %>% str_detect("^1")) & (txl$tel %>% duplicated() %>% `!`)  
+      txl = txl[index,]
+      validate_tels <- txl[,tel]
+      validate_num <- txl[,tel] %>% length()
+      qingshu_num <- txl[,name] %>% sapply(function(x) sapply(qinshu_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
+      black_num <- txl[,name] %>% sapply(function(x) sapply(black_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
+      edu_num <- txl[,name] %>% sapply(function(x) sapply(edu_dict, str_detect,string=x) %>% any(na.rm = T) %>% sum(na.rm = T)) %>% sum(na.rm = T)
+      (validate_num >= validate_limit & qingshu_num >= qingshu_limit & black_num <= black_limit & edu_num >= edu_limit) %>% as.character() 
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_txl_edu: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 # yyx
 ruleset$rule_yyx_shiming <- function(res){
   tryCatch(
@@ -1685,10 +1843,11 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
 ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth")){
   tryCatch(
     {
-      rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming",
-                                        "rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl"
-                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
-                                        ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
+      rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan_edu","rule_xinyan_error","rule_suanhua_error","rule_age","rule_zaiwang"
+                                        ,"rule_zmscore_edu","rule_taobao_his_days_edu","rule_taobao_shiming","rule_taobao_address_edu"
+                                        ,"rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl_edu"
+                                        ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days_edu","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
+                                        ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt_edu", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
                                         ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
       
       rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_his_days","rule_taobao_shiming","rule_txl"
