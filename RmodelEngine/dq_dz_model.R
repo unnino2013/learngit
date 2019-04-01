@@ -220,7 +220,7 @@ ruleset$rule_xuexin_xueli_limit <- function(res){
     }
   )
 }
-ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1){
+ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = 0){
   tryCatch(
     {
       if(is.null(res$moxieInfo$xuexinInfo)) stop('ERROR:res$moxieInfo$xuexinInfo is null.')
@@ -239,7 +239,7 @@ ruleset$rule_xuexin_in_school_limit <- function(res,edu_leave_school_years = -1)
       edu_xuezhi <- edu_leave_school_time %>% check_date() %>% `-`(edu_enrollment_time) %>% `/`(ddays(365)) %>% ceiling() # xuezhi 1234
       
       rt  <- 
-        ((edu_level_num %in% c(1,2)) && (edu_xuezhi >= 3) && (edu_grade <= (edu_xuezhi + edu_leave_school_years))) || # master below limit
+        ((edu_level_num %in% c(1,2)) && (edu_xuezhi >= 2) && (edu_grade <= (edu_xuezhi + edu_leave_school_years))) || # master below limit
         (edu_level_num > 2) # master above no limit
       rt %>% as.character()
     },
@@ -263,7 +263,7 @@ ruleset$rule_xuexin_xuezhi_limit <- function(res){
       edu_enrollment_time  <-  res$moxieInfo$xuexinInfo$studentInfo_list$enrollment_time %>% check_date() %>% check_NA()
       edu_xuezhi <- edu_leave_school_time %>% check_date() %>% `-`(edu_enrollment_time) %>% `/`(ddays(365)) %>% ceiling() # xuezhi 1234
       
-      (edu_xuezhi >= 3) %>% any()  %>% as.character()
+      (edu_xuezhi >= 2) %>% any()  %>% as.character()
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
@@ -406,8 +406,8 @@ ruleset$rule_txl_edu <- function(res,tel = 'tel',name = 'name'){
       edu_dict <- c("辅导","老师","班主任","班长","同学")
       #-- configs start---
       validate_limit = 20;
-      qingshu_limit = 1;
-      black_limit = 10
+      qingshu_limit = 3;
+      black_limit = 3
       edu_limit = 2
       #-- configs end---
       # if(is.null(res) || is.na(res) || (!is.list(res))) return("TRUE")
