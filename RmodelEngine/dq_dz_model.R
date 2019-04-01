@@ -124,7 +124,9 @@ ruleset$rule_taobao_his_days <- function(res,taobao_his_days_limit = 180){
   tryCatch(
     {
       if(is.null(res$moxieInfo$taobaoReport)) stop('ERROR:res$moxieInfo$taobaoReport is null.')
-      taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_NA()
+      taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_date()  %>% check_NA()
+      alipay_register_time <- res$moxieInfo$alipayInfo$userinfo$register_time %>% check_date() %>% check_NA()
+      taobao_first_ordertime <- if(is.na(taobao_first_ordertime)) alipay_register_time else taobao_first_ordertime
       taobao_his_days <- taobao_first_ordertime %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
       if(is.null(taobao_his_days) || is.na(taobao_his_days)) stop('ERROR:taobao_his_days is null.')
       (taobao_his_days > taobao_his_days_limit) %>% as.character()
@@ -333,7 +335,9 @@ ruleset$rule_taobao_his_days_edu <- function(res,taobao_his_days_limit = 30){
   tryCatch(
     {
       if(is.null(res$moxieInfo$taobaoReport)) stop('ERROR:res$moxieInfo$taobaoReport is null.')
-      taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_NA()
+      taobao_first_ordertime <- res$moxieInfo$taobaoReport$basic_info$user_and_account_basic_info$first_ordertime %>% check_date()  %>% check_NA()
+      alipay_register_time <- res$moxieInfo$alipayInfo$userinfo$register_time %>% check_date() %>% check_NA()
+      taobao_first_ordertime <- if(is.na(taobao_first_ordertime)) alipay_register_time else taobao_first_ordertime
       taobao_his_days <- taobao_first_ordertime %>% check_date() %>% `-`(Sys.Date(),.)  %>% `/`(ddays(1))  %>% check_NA()
       if(is.null(taobao_his_days) || is.na(taobao_his_days)) stop('ERROR:taobao_his_days is null.')
       (taobao_his_days > taobao_his_days_limit) %>% as.character()
