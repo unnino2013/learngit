@@ -283,9 +283,10 @@ ruleset$rule_zmscore_edu <- function(res){
       taobao_zmscore = res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore %>% check_num()
       taobao_zmscore_grade = taobao_zmscore %>% car_recode("1:599 = 'Z5';600:649 = 'Z4';650:699 = 'Z3';700:749 = 'Z2';750:Inf = 'Z1';else=NA") %>% check_char()
       zmscore = ifelse(taobao_zmscore_grade %in% c('Z1','Z2','Z3','Z4','Z5'),taobao_zmscore_grade,zm_zmscore)
-      if(check_null_NA(zmscore)) return('TRUE')
-      if(!zmscore %in% c('Z1','Z2','Z3','Z4','Z5')) return('TRUE')
-      zmscore %in% c('Z1','Z2','Z3','Z4')  %>% as.character()
+      huai_bei_limit = res$moxieInfo$taobaoReport$wealth_info$totalssets$huai_bei_limit %>% check_num()
+      if(!check_null_NA(taobao_zmscore) && taobao_zmscore > 0 && taobao_zmscore <= 550) stop("error:res$moxieInfo$taobaoReport$wealth_info$totalssets$taobao_zmscore less than limit!")
+      rt <- (zmscore %in% c('Z1','Z2','Z3','Z4')) || (!check_null_NA(huai_bei_limit) && huai_bei_limit >= 200)
+      rt %>% as.character()
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
@@ -294,7 +295,6 @@ ruleset$rule_zmscore_edu <- function(res){
     }
   )
 }
-
 ruleset$rule_xinyan_edu <- function(res){
   tryCatch(
     {
