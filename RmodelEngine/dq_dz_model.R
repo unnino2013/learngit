@@ -1277,6 +1277,170 @@ ruleset$rule_zrobot_sc_zrxy_zm <- function(res,limit = 450){
     }
   )
 }
+ruleset$rule_zrobot_sc_zrxy_edu <- function(res,limit = 400){
+  tryCatch(
+    {
+      #-----zrxy------
+      sql_zrxy = 
+        "select 
+      
+      383.903595255632  +  72.1347520444482  * log(score_p / (1-score_p))  as score,
+      *  
+      from 
+      ( select 
+      1/(1 + exp(-1 * (1 * 1.29397150550726 + zr_score * 0.256757361337072 + 
+      zaiwang * 0.95792277524138 + sex * 0.529841420870505 + 
+      query_sum_count * 0.673237060561867 + zr_binding_phones * 0.392370779773745 + 
+      loans_count * 0.0113640091299555 + loans_score * 0.0114134936412465 + 
+      latest_one_month_suc * 0.421966488526195 + zr_overdue_status_12m * 
+      0.214074602211157 + zr_sn_order1_blacklist_contacts_cnt * 0.570185720704065 + 
+      zr_performance_index * 0.879091344076989 + zr_ecommerce_account_history * 
+      1.26673675064716)))  as score_p,
+      *  
+      from 
+      ( select 
+      /****** zr_score ******/
+      case 
+      when  zr_score IS NULL then 0 
+      when  zr_score <=-1 then 0.0979804083602036         --not finded is-1 range500-750
+      when -1 < zr_score and zr_score <=588 then -1.22377543162212 
+      when 588 < zr_score and zr_score <=638 then -0.1576724215193 
+      when 638 < zr_score and zr_score <=651 then 0.393567660319098 
+      when 651 < zr_score  then 2.47889734462416  
+      else  -0.09999  end as 
+      zr_score ,
+      /******************************/
+      /****** zaiwang ******/
+      case 
+      when zaiwang in ( '1' ) then -1.72887038067912 
+      when zaiwang in ( '3' ) then 0.173263468780752 
+      when zaiwang in ( '4' ) then 0.687664607038514 
+      when zaiwang in ( '2' ) then -1.53284869405521 
+      when zaiwang in ( '' ) then 0 
+      else  -0.09999  end as 
+      zaiwang ,
+      /******************************/
+      /****** sex ******/
+      case 
+      when sex in ( 'female' ) then 0.876285397260456 
+      when sex in ( 'male' ) then -0.169334361267143  
+      else  -0.09999  end as 
+      sex ,
+      /******************************/
+      /****** query_sum_count ******/
+      case 
+      when  query_sum_count IS NULL then 1.52612187941559 
+      when  query_sum_count <=2 then 1.87481422737158 
+      when 2 < query_sum_count and query_sum_count <=4 then 1.47028852750535 
+      when 4 < query_sum_count and query_sum_count <=9 then -0.518793793415168 
+      when 9 < query_sum_count and query_sum_count <=26.4 then -1.08764325729754 
+      when 26.4 < query_sum_count  then -1.78686948393386  
+      else  -0.09999  end as 
+      query_sum_count ,
+      /******************************/
+      /****** zr_binding_phones ******/
+      case 
+      when  zr_binding_phones IS NULL then 5.79239569074685 
+      when  zr_binding_phones <=1 then 1.28339119482608 
+      when 1 < zr_binding_phones and zr_binding_phones <=2 then -0.782475870504735 
+      when 2 < zr_binding_phones  then -1.70620158086641  
+      else  -0.09999  end as 
+      zr_binding_phones ,
+      /******************************/
+      /****** loans_count ******/
+      case 
+      when  loans_count IS NULL then 0.713349887877465 
+      when  loans_count <=2 then 0.968808766157601 
+      when 2 < loans_count and loans_count <=3 then 0.162518929497775 
+      when 3 < loans_count and loans_count <=8 then -0.286865412545225 
+      when 8 < loans_count and loans_count <=29 then -1.08764325729754 
+      when 29 < loans_count  then -2.79239134953596  
+      else  -0.09999  end as 
+      loans_count ,
+      /******************************/
+      /****** loans_score ******/
+      case 
+      when  loans_score IS NULL then 0.713349887877465 
+      when  loans_score <=492 then -2.42774823594805 
+      when 492 < loans_score and loans_score <=565 then -0.859553282048 
+      when 565 < loans_score and loans_score <=592 then 0.0246491352746541 
+      when 592 < loans_score and loans_score <=607 then 0.298651103822355 
+      when 607 < loans_score  then 0.364609071614152  
+      else  -0.09999  end as 
+      loans_score ,
+      /******************************/
+      /****** latest_one_month_suc ******/
+      case 
+      when  latest_one_month_suc IS NULL then 0.713349887877465 
+      when  latest_one_month_suc <=0 then -1.21685498877754 
+      when 0 < latest_one_month_suc and latest_one_month_suc <=1 then 1.07880966137193 
+      when 1 < latest_one_month_suc  then 2.28278246569787  
+      else  -0.09999  end as 
+      latest_one_month_suc ,
+      /******************************/
+      /****** zr_overdue_status_12m ******/
+      case 
+      when  zr_overdue_status_12m IS NULL then 0.428387425478326 
+      when  zr_overdue_status_12m <=0 then -0.350044314166757 
+      when 0 < zr_overdue_status_12m and zr_overdue_status_12m <=1 then -2.31055326264322  
+      else  -0.09999  end as 
+      zr_overdue_status_12m ,
+      /******************************/
+      /****** zr_sn_order1_blacklist_contacts_cnt ******/
+      case 
+      when  zr_sn_order1_blacklist_contacts_cnt IS NULL then -0.504548538279119 
+      when  zr_sn_order1_blacklist_contacts_cnt <=0 then 0.598082068763219 
+      when 0 < zr_sn_order1_blacklist_contacts_cnt and zr_sn_order1_blacklist_contacts_cnt <=1 then 0.361564929232924 
+      when 1 < zr_sn_order1_blacklist_contacts_cnt  then -1.15231646763997  
+      else  -0.09999  end as 
+      zr_sn_order1_blacklist_contacts_cnt ,
+      /******************************/
+      /****** zr_performance_index ******/
+      case 
+      when  zr_performance_index IS NULL then -0.238741547328358 
+      when  zr_performance_index <=50 then -0.0251359732715423 
+      when 50 < zr_performance_index and zr_performance_index <=75 then 0.263060158719652 
+      when 75 < zr_performance_index  then 2.84239825363329  
+      else  -0.09999  end as 
+      zr_performance_index ,
+      /******************************/
+      /****** zr_ecommerce_account_history ******/
+      case 
+      when  zr_ecommerce_account_history IS NULL then -0.238741547328358 
+      when  zr_ecommerce_account_history <=4 then -0.307484699747961 
+      when 4 < zr_ecommerce_account_history and zr_ecommerce_account_history <=5 then 0.877256742650088  
+      else  -0.09999  end as 
+      zr_ecommerce_account_history  
+      from  infos  --you should modify the table name. 
+      )a 
+      )b
+      "
+      
+      #-----------compute---------------------
+      infos <- extract_scorefeatures_from_list(res)
+      library(DBI);library(RSQLite)
+      con <- dbConnect(RSQLite::SQLite(), ":memory:")
+      RSQLite::dbWriteTable(con, "infos", infos,overwrite = TRUE)
+      rs <- DBI::dbSendQuery(con,sql_zrxy)
+      infos_w <- dbFetch(rs)
+      DBI::dbClearResult(rs)
+      DBI::dbDisconnect(con);
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_zrobot_sc_zrxy_edu: ~m'));flog.info('%s',list(infos_w=infos_w,infos=infos) %>% jsonlite::toJSON(na = 'null'))      
+      # score process
+      score <- round(infos_w$score) + round(mod(infos$age,10) / 3) # rnd
+      infos$score_p <- infos_w$score_p
+      infos$score <- infos_w$score
+      infos$score_adj <- score
+      (score > limit) %>% as.character()
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_zrobot_sc_zrxy_zm: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 ruleset$rule_zrobot_sn_order1_blacklist_contacts_cnt <- function(res){
   tryCatch(
     {
@@ -1852,7 +2016,7 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
                                         ,"rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl_edu"
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days_edu","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt_edu", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
-                                        ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
+                                        ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_edu")
       
       rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_shiming","rule_txl"
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
