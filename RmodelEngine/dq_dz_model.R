@@ -56,6 +56,20 @@ ruleset$rule_region <- function(res){
     }
   )
 }
+ruleset$rule_nation <- function(res){
+  tryCatch(
+    {
+      nation = res$baseInfo$nation %>% check_char()
+      if(check_null_NA(nation)) return('TRUE')
+      nation %in% c('汉族',"汉")  %>% as.character()
+    },
+    error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]rule_nation: ~m'));flog.error('%s',e)
+      "ERROR"
+    }
+  )
+}
 ruleset$rule_age <- function(res=list(),age_limit = c(18,45)){
   tryCatch(
     {
@@ -2011,22 +2025,22 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
 ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth")){
   tryCatch(
     {
-      rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan_edu","rule_xinyan_error","rule_suanhua_error","rule_age","rule_zaiwang"
+      rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan_edu","rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_zaiwang"
                                         ,"rule_zmscore_edu","rule_taobao_shiming","rule_taobao_address_edu"
                                         ,"rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl_edu"
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days_edu","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt_edu", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
                                         ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_edu")
       
-      rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_shiming","rule_txl"
+      rule_rent_app_society_state <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_zaiwang","rule_zmscore","rule_taobao_shiming","rule_txl"
                                         ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue","rule_taobao_alipay_his_days","rule_taobao_alipayinfo_bankcard_cnt","rule_taobao_alipayinfo_deliver_tel"
                                         ,"rule_taobao_order_succ_recentdeliveraddress_cnt", "rule_taobao_order_succ_cnt", "rule_taobao_huabei_amt", "rule_taobao_huabei_amt_canuse", "rule_taobao_huabei_amt_use_ratio"
                                         ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
       
-      rule_rent_alipay            <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_zrobot_sc_zrxy_zm")
-      rule_rent_alipay_app        <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_zaiwang","rule_zmscore","rule_txl","rule_zrobot_sc_zrxy_zm")
+      rule_rent_alipay            <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_zaiwang","rule_zmscore","rule_zrobot_sc_zrxy_zm")
+      rule_rent_alipay_app        <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_zaiwang","rule_zmscore","rule_txl","rule_zrobot_sc_zrxy_zm")
       
-      rule_cashloan               <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_shiming","rule_txl",
+      rule_cashloan               <-  c("rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_sanyaosu","rule_zaiwang","rule_zmscore","rule_taobao_shiming","rule_txl",
                                         "rule_yyx_call_last6m_topin_txl","rule_yyx_call_last6m_concentrate",
                                         "rule_yyx_call_last6m_Silent_days_n7_cnt","rule_yyx_call_last6m_Silent_days_n5_cnt","rule_yyx_call_last6m_Silent_days_n3_cnt",
                                         "rule_yyx_call_last6m_dialed_succ_ratio","rule_yyx_call_last3m_dialed_succ_ratio","rule_yyx_call_last1m_dialed_succ_ratio"
