@@ -61,7 +61,7 @@ ruleset$rule_nation <- function(res){
     {
       nation = res$baseInfo$nation %>% check_char()
       if(check_null_NA(nation)) return('TRUE')
-      nation %in% c('汉族',"汉")  %>% as.character()
+      nation %in% c('汉族',"汉","","0")  %>% as.character()
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
