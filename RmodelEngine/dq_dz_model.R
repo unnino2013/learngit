@@ -1949,7 +1949,7 @@ scoreFun = function(json,str_sql =NULL,str_amt=NULL){
         if(res$baseInfo$id_card %in% white_list){
           decision$score <- 111
           decision$advice <- 1;
-          decision$final_amt <- 100;
+          # decision$final_amt <- 100;
           decision$white_status <- 1;
         }
       }
