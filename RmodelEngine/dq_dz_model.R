@@ -2156,7 +2156,7 @@ amtFun_rent_app_edu = function(json,loan_amt_ratio = 1.0,score_threshold = 600,m
         if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$level)) return(0)
         # compute amt
         edu_advice_amt_check <- function(edu_level) {edu_level %>%
-            car_recode("'专科' = 4500;'本科' = 5000;'硕士研究生' = 6000;'博士研究生' = 7000;else = 0") %>% max(na.rm = TRUE)}
+            car_recode("'专科' = 5000;'本科' = 6000;'硕士研究生' = 7000;'博士研究生' = 8000;else = 0") %>% max(na.rm = TRUE)}
         amt = res$moxieInfo$xuexinInfo$studentInfo_list$level %>% edu_advice_amt_check() %>% check_num()
         amt
         },
