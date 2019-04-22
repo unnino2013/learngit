@@ -380,12 +380,12 @@ ruleset$rule_taobao_alipay_his_days_edu <- function(res,taobao_alipay_his_days_l
   )
 }
 
-ruleset$rule_taobao_address_edu <- function(res){
+ruleset$rule_taobao_address_edu <- function(res,len=6){
   tryCatch(
     {
       if(is.null(res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address)) stop("error:res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address is NULL!")
       if(is.null(res$moxieInfo$xuexinInfo$studentInfo_list$school_name)) stop("error:res$moxieInfo$xuexinInfo$studentInfo_list$school_name is NULL!")
-      res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address %>% unique() %>% str_detect(res$moxieInfo$xuexinInfo$studentInfo_list$school_name) %>% any() %>% as.character()
+      res$moxieInfo$taobaoInfo$recentdeliveraddress$deliver_address %>% unique() %>% str_detect(res$moxieInfo$xuexinInfo$studentInfo_list$school_name %>% str_sub(1,6)) %>% any() %>% as.character()
     },
     error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
@@ -423,7 +423,7 @@ ruleset$rule_txl_edu <- function(res,tel = 'tel',name = 'name'){
                       "无抵押","高利贷","信用","二手车","垫养","呆账","欠款","欠钱","赌博")
       edu_dict <- c("辅导","老师","班主任","班长","同学","导员","同学","室友","主任")
       #-- configs start---
-      validate_limit = 20;
+      validate_limit = 15;
       qingshu_limit = 2;
       black_limit = 3
       edu_limit = 2
@@ -839,6 +839,24 @@ apv_skip_through_of_zmscore_huabei <- function(res){
     ,error = function(e){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]apv_skip_through_of_zmscore_huabei: ~m'));flog.error('%s',e)
+      FALSE
+    }
+  )
+}
+
+apv_skip_through_of_DDF <- function(json,limit =700){
+  tryCatch(
+    {
+      DDF <- scoreFun_base(json)
+      DDF %>% `>=`(limit)  -> rt 
+      if(is.null(rt) || is.na(rt)) stop("error:apv_skip_through_of_DDF produce error,rt is NULL!")
+      if(!rt %in% c(T,F)) stop("error:apv_skip_through_of_DDF produce error,rt is not logic!")
+      rt
+      # alipay
+    }
+    ,error = function(e){
+      flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
+                  layout.format('[~l] [~t] [~n.~f]apv_skip_through_of_DDF: ~m'));flog.error('%s',e)
       FALSE
     }
   )
@@ -1859,7 +1877,7 @@ scoreFun_custom <- function(json){
       flog.logger(name='ROOT',INFO,appender = appender.file(paste(Sys.Date(),'modellog.log')),
                   layout.format('[~l] [~t] [~n.~f]cust_status: ~m'));flog.info('%s',ID_INFO)
       # apv skip through check
-      apv_skip_state <- apv_skip_through_of_zmscore_huabei(res)
+      apv_skip_state <- apv_skip_through_of_zmscore_huabei(res) || apv_skip_through_of_DDF(json)
       #---SCORE & RULE COMPUTE BEGIN ---#
       if(cashloan_id){
         #--- cashloan---#
@@ -1893,7 +1911,7 @@ scoreFun_custom <- function(json){
         #--- rent edu---#
         # score <- scoreFun_rent_app_edu(json)
         if(apv_skip_state){
-          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("apv_skip_throuth"))
+          rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("edu_apv_skip_throuth"))
         }else{
           rule_mingzhong <- ruleFun_custom(json,ruleset,product_type = c("rent_app_edu"))
         }
@@ -2022,7 +2040,7 @@ ruleFun_base <- function(json,rules_config='',ruleset = ruleset){
     }
   )
 }
-ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth")){
+ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_app_soc","rent_alipay","rent_alipay_app","cashloan","apv_skip_throuth","alipay_apv_skip_throuth","edu_apv_skip_throuth")){
   tryCatch(
     {
       rule_rent_app_student_state <-  c("rule_suanhua_G1_payday","rule_xinyan_edu","rule_xinyan_error","rule_suanhua_error","rule_region","rule_nation","rule_age","rule_zaiwang"
@@ -2051,7 +2069,9 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
                                          ,"rule_taobao_alipay_shiming","rule_taobao_alipayinfo_error","rule_taobao_alipayinfo_huabei_overdue"
                                          ,"rule_zrobot_idcard_in_blacklist","rule_zrobot_sn_order1_blacklist_contacts_cnt","rule_zrobot_sc_zrxy_zm")
       rule_alipay_apv_skip_throuth <-  c("rule_suanhua_G1_payday","rule_xinyan","rule_xinyan_error","rule_suanhua_error","rule_apv_skip_through_of_zmscore_huabei","rule_zrobot_sc_zrxy_zm")
-      
+      rule_edu_apv_skip_throuth <- c("rule_zmscore_edu","rule_taobao_shiming","rule_taobao_address_edu"
+                                     ,"rule_xuexin_xueli_limit","rule_xuexin_in_school_limit","rule_xuexin_xuezhi_limit","rule_txl_edu"
+                                     ,"rule_taobao_alipay_shiming","rule_xinyan")
       # ruleFun_list = ruleset$ruleFun_list
       if(product_type == "rent_app_edu"){
         ruleFun_base(json,rules_config = rule_rent_app_student_state,ruleset) -> rt
@@ -2067,6 +2087,8 @@ ruleFun_custom <- function(json,ruleset,product_type = c("rent_app_edu","rent_ap
         ruleFun_base(json,rules_config = rule_apv_skip_throuth,ruleset) -> rt
       }else if(product_type == "alipay_apv_skip_throuth"){
         ruleFun_base(json,rules_config = rule_alipay_apv_skip_throuth,ruleset) -> rt
+      }else if(product_type == "edu_apv_skip_throuth"){
+        ruleFun_base(json,rules_config = rule_edu_apv_skip_throuth,ruleset) -> rt
       }else{
         NULL -> rt
       }
