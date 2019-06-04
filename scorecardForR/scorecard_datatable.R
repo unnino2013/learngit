@@ -426,6 +426,18 @@ scorescale_f <- function(y_fit,base_odds = 20/1.0,pdo = 50,base_points = 600){
 # score = score_f(y_fit)$score
 
 
+# strategy_f <- function(y=NULL,score=NULL,bins = 30){
+#   dt = data.table(score=score,y=y)
+#   cut_pts = c(-Inf,unique(quantile(score,probs = seq(2:(bins-1))/bins,na.rm = TRUE)),Inf)
+#   dt[,'score_bin' := .(cut(score,breaks = cut_pts))][
+#     ,.(cnt = .N,good = sum(y),bad = .N-sum(y),
+#        bad_rate = (.N-sum(y))/.N,odds = sum(y)/(.N-sum(y))),
+#     keyby='score_bin'
+#     ][,'pct':= list(cnt / sum(cnt))
+#       ][,'cum_pct' := list(cumsum(pct))
+#         ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][]
+# }
+# strategy_f(OOT_woe$y,score)
 strategy_f <- function(y=NULL,score=NULL,bins = 30){
   dt = data.table(score=score,y=y)
   cut_pts = c(-Inf,unique(quantile(score,probs = seq(2:(bins-1))/bins,na.rm = TRUE)),Inf)
@@ -435,10 +447,10 @@ strategy_f <- function(y=NULL,score=NULL,bins = 30){
     keyby='score_bin'
     ][,'pct':= list(cnt / sum(cnt))
       ][,'cum_pct' := list(cumsum(pct))
-        ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][]
+        ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][
+          ,'cum_bad_rate':= list(lag((sum(bad) - cumsum(bad)) / (sum(cnt) - cumsum(cnt)),1))
+          ][]
 }
-# strategy_f(OOT_woe$y,score)
-
 
 ksplot <- function(target,pred){
   df = data.frame(target,pred)
