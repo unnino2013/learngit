@@ -754,7 +754,60 @@ lasso_glm_regression <- function(xy=data.table(),x=c('',''),y='y',var_nums = 15,
   results
 }
 
+create_scored <- function(iv_tabs,GLM,pdo = 50,base_points = 600,base_odds = 5 / 1.0){
+  vars = GLM %>% coef() %>% names() # %>% `[`(-1)
+  beta = GLM %>% coef()
+  B = pdo / log(2)    
+  A = base_points - B * log(base_odds)
+  woes = iv_tabs$woes[vars[-1]]
+  # woes$`(Intercept)`= data.frame(woe=1)
+  for(x in vars[-1]){
+    woes[[x]]$woe_score <- woes[[x]]$woe * beta[x] *  B
+  }
+  woe_score2sql(woes,intercept=beta['(Intercept)']) 
+}
+create_scored(iv_tabs,GLM) %>% cat(file='model20190605/scorecard0605.txt')
 
 
+woe_score2sql <- function(woe_list = NULL,intercept=-1.853679,A=483.9036,B=72.13475,table_name = "xxxxxx",...){
+  sql_statement = NULL
+  for(col in names(woe_list)){
+    if(woe_list[[col]][["x"]] %>%  str_detect("-Inf") %>% ifelse(is.na(.),0,.) %>% sum()) {
+      sql_statement = c(sql_statement,woe_score2sql_num(woe_list[[col]],...))
+    }
+    else sql_statement = c(sql_statement,woe_score2sql_char(woe_list[[col]],...))
+  }
+  base_score = paste(A,"+",intercept * B,"as base_score,\n",sep=" ")
+  sql_statement %>% 
+    paste0(collapse = ' ,\n/******************************/\n') %>% 
+    paste('select \n',base_score,.,' \n from ',table_name,' --you should modify the table name.')  # %>% cat()
+}
 
+woe_score2sql_num <-
+  function(woe_table = NULL,if_NA = -9999,woe_precision = 16){
+    # woe_table <- iv_tabs$woe$age
+    pat = paste('(-Inf < ',woe_table$x_name %>% unique(),' and)|(and ',woe_table$x_name %>% unique(),' <= Inf)',sep='')
+    woe_table$x %>% as.character() %>% {function(x) str_sub(x,2,nchar(x)-1)}() %>% 
+      str_replace(',',woe_table$x_name %>% unique() %>% paste0(' < ',.,' and ',.," <=")) %>% 
+      str_replace(pat,"") %>% # 改模式 "(-Inf < )|( <= Inf)"
+      mapply(paste0,' when ', ., " then ", round(woe_table$woe_score,woe_precision)) %>% 
+      paste0(collapse = ' \n') %>% 
+      paste('/******',unique(woe_table$x_name),'******/\n',
+            'case \n',.,' \n else ',if_NA,' end as \n',unique(woe_table$x_name)) %>% # %>% cat()
+      str_replace(' NA ',paste0('  ',woe_table$x_name %>% unique(),' IS NULL ',collapse = '')) # 处理缺失值sql
+    
+  }
+woe_score2sql_char <- function(woe_table = NULL,if_NA = -9999,woe_precision = 16){
+  # woe_table <- iv_tabs$woe$province
+  mapply(paste0,
+         ' when ',
+         woe_table$x_name,
+         " in ( '" , 
+         {woe_table$x %>% str_replace_all("(::)|(&&)","','") %>% str_replace_all("NA","") },
+         "' ) then ",
+         round(woe_table$woe_score,woe_precision)) %>% 
+    paste0(collapse = ' \n') %>% 
+    paste('/******',unique(woe_table$x_name),'******/\n',
+          'case \n',.,' \n else ',if_NA,' end as \n',unique(woe_table$x_name))  # %>% cat()
+}
 
