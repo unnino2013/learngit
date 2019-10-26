@@ -95,7 +95,7 @@ num2char <- function(x = NULL,cut_pts = 5){ # use for quick Ivs
   x
 }
 
-iv_for_numeric_ <- function(y,x,zero_replace = 0.0001){
+iv_for_numeric_ <- function(y,x,zero_replace = 0.0001,cut_pts = 5){
   if(sum(is.na(y)) > 0) stop('NAs not allowes in y.')
   if(!is.numeric(x)) stop('x must be numric.')
   x_rt = dt = agg_ = NULL
@@ -106,20 +106,20 @@ iv_for_numeric_ <- function(y,x,zero_replace = 0.0001){
         cut_pts = c(-Inf,unique(x),Inf)
         return(cut(x,breaks=cut_pts))}
       else{
-        cut_pts = c(-Inf,unique(quantile(x,probs = seq(0.2,0.8,0.2),na.rm = TRUE)),Inf)
+        cut_pts = c(-Inf,unique(quantile(x,probs = seq(1/cut_pts,1/cut_pts * (cut_pts-1),1/cut_pts),na.rm = TRUE)),Inf)
         return(cut(x,breaks=cut_pts))}
-      }
+    }
     x
   }
   #------function end-----
-  x_rt <- num2char(x)
+  x_rt <- num2char(x,cut_pts)
   dt <- data.table(y,x_rt)
   agg_ <- dt[,.(good = sum(y),bad = sum(y==0),total = .N,good_rate = sum(y) / .N),keyby = "x_rt"]
   agg_[,`:=`(c('good_cum','bad_cum'),lapply(.SD,cumsum)),.SDcols = c('good','bad')
        ][,`:=`(c('good_dist','bad_dist'),lapply(.SD,function(x) x / sum(x))),.SDcols = c('good','bad')
          ][,`:=`('woe' = log(good_dist / bad_dist),'iv' = (good_dist - bad_dist) * log(good_dist / bad_dist))]
   # agg_ = agg_ %>% mutate(woe = ifelse(is.na(woe) | is.infinite(woe),0,woe), iv = ifelse(is.na(iv) | is.infinite(iv),0,iv)) 
-
+  
   agg_ = agg_ %>% 
     mutate(woe = ifelse(is.na(woe) ,0,woe)) %>% 
     mutate(woe = ifelse(bad_dist ==0  | good_dist == 0,log((good_dist + zero_replace) / (bad_dist + zero_replace)), woe)) %>% 
@@ -127,6 +127,7 @@ iv_for_numeric_ <- function(y,x,zero_replace = 0.0001){
   
   return(list(agg_ = agg_ %>% rename(x = x_rt),iv = agg_$iv %>% sum()))
 }
+
 
 woe_monotone_detect <- function(woelist=iv_tabs$woe){ # 检测woe单调性
   mono_cols = NULL
