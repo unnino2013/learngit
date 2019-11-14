@@ -755,7 +755,7 @@ lasso_glm_regression <- function(xy=data.table(),x=c('',''),y='y',var_nums = 15,
   results
 }
 
-create_scored <- function(iv_tabs,GLM,pdo = 50,base_points = 600,base_odds = 5 / 1.0){
+create_scorecard_sql <- function(iv_tabs,GLM,pdo = 50,base_points = 600,base_odds = 20 / 1.0){
   vars = GLM %>% coef() %>% names() # %>% `[`(-1)
   beta = GLM %>% coef()
   B = pdo / log(2)    
@@ -765,12 +765,12 @@ create_scored <- function(iv_tabs,GLM,pdo = 50,base_points = 600,base_odds = 5 /
   for(x in vars[-1]){
     woes[[x]]$woe_score <- woes[[x]]$woe * beta[x] *  B
   }
-  woe_score2sql(woes,intercept=beta['(Intercept)']) 
+  woe_score2sql(woes,intercept=beta['(Intercept)'],A=A,B=B) 
 }
-create_scored(iv_tabs,GLM) %>% cat(file='model20190605/scorecard0605.txt')
+# create_scorecard_sql(iv_tabs,GLM) %>% cat(file='model20190605/scorecard0605.txt')
+# score_dt = sqldf(sql_sscorecard) #  
 
-
-woe_score2sql <- function(woe_list = NULL,intercept=-1.853679,A=483.9036,B=72.13475,table_name = "xxxxxx",...){
+woe_score2sql <- function(woe_list = NULL,intercept=-1.853679,A=383.9036,B=72.13475,table_name = "xxxxxx",...){
   sql_statement = NULL
   for(col in names(woe_list)){
     if(woe_list[[col]][["x"]] %>%  str_detect("-Inf") %>% ifelse(is.na(.),0,.) %>% sum()) {
@@ -811,4 +811,5 @@ woe_score2sql_char <- function(woe_table = NULL,if_NA = -9999,woe_precision = 16
     paste('/******',unique(woe_table$x_name),'******/\n',
           'case \n',.,' \n else ',if_NA,' end as \n',unique(woe_table$x_name))  # %>% cat()
 }
+
 
