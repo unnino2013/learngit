@@ -129,12 +129,12 @@ iv_for_numeric_ <- function(y,x,zero_replace = 0.0001,cut_pts = 5){
 }
 
 
-woe_monotone_detect <- function(woelist=iv_tabs$woe){ # 检测woe单调性
+woe_monotone_detect <- function(woelist=iv_tabs$woe){ # 检测woe单调�?
   mono_cols = NULL
   if(class(woelist) == 'iv_tabs') woelist = woelist$woes
   if(class(woelist) == 'woe') {
     for(col in names(woelist)){
-      # 判断数值类型
+      # 判断数值类�?
       if(woelist[[col]]$x %>% str_detect('Inf') %>% sum(.,na.rm = T)){
         woe_mono <- woelist[[col]][,c('x','woe')] %>% `[`(complete.cases(.),) %>% `[`(,'woe') %>% diff(lag = 1) %>% `>`(0) %>% unique() %>% length() %>% `==`(1)
         if(woe_mono) mono_cols <- c(mono_cols,col)
@@ -304,7 +304,7 @@ features_filter_for_glm_by_lars <- function(x_mat = NULL, y_vec = NULL,features_
   library(biglars);library(dplyr);library(magrittr)
   lasso = biglars.fit(x=x_mat,y=y_vec,type ='lasso',removeColumns =T)
   if(ncol(x_mat) <= features_sel_num) features_sel_num = ncol(x_mat)
-  cols = c(which(lasso$coefficients[features_sel_num + 1,] != 0)  %>% names() %>% '['(-1),c('sex','province')) # 选n个变量
+  cols = c(which(lasso$coefficients[features_sel_num + 1,] != 0)  %>% names() %>% '['(-1),c('sex','province')) # 选n个变�?
   names(cols) = paste('lars',1:length(cols),sep = '')
   force_keep_features = lubridate::setdiff(force_keep_features,cols)
   if(length(force_keep_features) > 0) names(force_keep_features) = paste('keep', 1:length(force_keep_features),sep = '')
@@ -318,7 +318,7 @@ features_filter_for_glm_by_ivs_lars <- function(data = NULL,ivs = NULL,iv_cutoff
   y_vec=data$y
   lasso = biglars.fit(x=x_mat,y=y_vec,type ='lasso',removeColumns =T)
   if(ncol(x_mat) <= features_sel_num) features_sel_num = ncol(x_mat)
-  cols = c(which(lasso$coefficients[features_sel_num + 1,] != 0)  %>% names() %>% '['(-1),c('sex','province')) # 选n个变量
+  cols = c(which(lasso$coefficients[features_sel_num + 1,] != 0)  %>% names() %>% '['(-1),c('sex','province')) # 选n个变�?
   names(cols) = paste('lars',1:length(cols),sep = '')
   force_keep_features = lubridate::setdiff(force_keep_features,cols)
   if(length(force_keep_features) > 0) names(force_keep_features) = paste('keep', 1:length(force_keep_features),sep = '')
@@ -345,7 +345,7 @@ woe2sql_num <- function(woe_table = NULL,if_NA = -9999,woe_precision = 16){
   pat = paste('(-Inf < ',woe_table$x_name %>% unique(),' and)|(and ',woe_table$x_name %>% unique(),' <= Inf)',sep='')
   woe_table$x %>% as.character() %>% {function(x) str_sub(x,2,nchar(x)-1)}() %>% 
     str_replace(',',woe_table$x_name %>% unique() %>% paste0(' < ',.,' and ',.," <=")) %>% 
-    str_replace(pat,"") %>% # 改模式 "(-Inf < )|( <= Inf)"
+    str_replace(pat,"") %>% # 改模�? "(-Inf < )|( <= Inf)"
     mapply(paste0,' when ', ., " then ", round(woe_table$woe,woe_precision)) %>% 
     paste0(collapse = ' \n') %>% 
     paste('/******',unique(woe_table$x_name),'******/\n',
@@ -450,7 +450,9 @@ strategy_f <- function(y=NULL,score=NULL,bins = 30){
       ][,'cum_pct' := list(cumsum(pct))
         ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][
           ,'cum_bad_rate':= list(lag((sum(bad) - cumsum(bad)) / (sum(cnt) - cumsum(cnt)),1))
-          ][]
+          ][,'cum_good_rate':= list(1- cum_bad_rate)
+            ][,'cum_apv_good_rate':= list(apv_ratio * cum_good_rate)  # ������*����ת����
+            ][]
 }
 
 ksplot <- function(target,pred){
@@ -459,7 +461,7 @@ ksplot <- function(target,pred){
   # write.csv(df,'kyd_ks.csv',row.names=F)
   df$x0 <- 1-df$x1
   df=cbind(df,cut(df[,'x1'],100))
-  df=df[order(df[,'x1']),] # 鎺掑簭
+  df=df[order(df[,'x1']),] # 鎺掑�?
   
   library(sqldf)
   names(df)=c("target","x1","x0","bin")
@@ -494,7 +496,7 @@ ks_and_auc_plot <- function(y = NULL,y_fit = NULL){
 #----------------------------------------------
 # 读入数据
 # library(data.table)
-# dt = data.table::fread('E:\\TIANSHENDAI\\2018第三方数据测试\\天创\\天创第二批测试回溯版\\天神贷第二批样本多头借贷高级版（回溯）测试报告.csv')
+# dt = data.table::fread('E:\\TIANSHENDAI\\2018第三方数据测试\\天创\\天创第二批测试回溯版\\天神贷第二批样本多头借贷高级版（回溯）测试报�?.csv')
 # names(dt)[c(1,4:32,34:38,41:45,48:58,65)]
 # dt_y = data.table::fread('E:\\TIANSHENDAI\\2018第三方数据测试\\天创\\天创第二批测试回溯版\\sample_0514.txt')
 # dt_a = merge(dt,dt_y,by.x = 'idcard',by.y = 'id_num')
@@ -588,7 +590,7 @@ ks_and_auc_plot <- function(y = NULL,y_fit = NULL){
 # vars_all = dataset %>% colnames %>% select_vars(-matches(`target`))
 
 
-# 此后代码不用改
+# 此后代码不用�?
 # # 拆分训练集测试集
 # library(dtplyr)
 # library(scorecard)
@@ -598,8 +600,8 @@ ks_and_auc_plot <- function(y = NULL,y_fit = NULL){
 # # compute IVs
 # train %>% colnames
 # IVs = iv(train, y= target, x = vars_all, positive = "bad|1", order = TRUE)
-# # vars_pre_chosed <- IVs %>% filter(info_value >= 0.1) %>% `[[`('variable') # iv大于0.1的
-# # 预筛选变量
+# # vars_pre_chosed <- IVs %>% filter(info_value >= 0.1) %>% `[[`('variable') # iv大于0.1�?
+# # 预筛选变�?
 # vars_pre_chosed <- 
 #   var_filter(train, y= target, x = vars_all,
 #              iv_limit = 0.1, missing_limit = 0.95,identical_limit = 0.95,
@@ -618,17 +620,17 @@ score_f <- function(y_fit,base_odds = 9/1.0,pdo=50,base_points = 600){
   list(score = score,A=A,B=B,base_odds = base_odds,pdo=20,base_points = 600)
 }
 
-strategy_f <- function(y=NULL,score=NULL,bins = 30){
-  dt = data.table(score=score,y=y)
-  cut_pts = c(-Inf,unique(quantile(score,probs = seq(2:(bins-1))/bins,na.rm = TRUE)),Inf)
-  dt[,'score_bin' := .(cut(score,breaks = cut_pts))][
-    ,.(cnt = .N,good = sum(y),bad = .N-sum(y),
-       bad_rate = (.N-sum(y))/.N,odds = sum(y)/(.N-sum(y))),
-    keyby='score_bin'
-    ][,'pct':= list(cnt / sum(cnt))
-      ][,'cum_pct' := list(cumsum(pct))
-        ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][]
-}
+# strategy_f <- function(y=NULL,score=NULL,bins = 30){
+#   dt = data.table(score=score,y=y)
+#   cut_pts = c(-Inf,unique(quantile(score,probs = seq(2:(bins-1))/bins,na.rm = TRUE)),Inf)
+#   dt[,'score_bin' := .(cut(score,breaks = cut_pts))][
+#     ,.(cnt = .N,good = sum(y),bad = .N-sum(y),
+#        bad_rate = (.N-sum(y))/.N,odds = sum(y)/(.N-sum(y))),
+#     keyby='score_bin'
+#     ][,'pct':= list(cnt / sum(cnt))
+#       ][,'cum_pct' := list(cumsum(pct))
+#         ][,'apv_ratio' := list(1-cum_pct)][,'apv_ratio' := lag(apv_ratio,1)][]
+# }
 
 
 
@@ -682,7 +684,7 @@ lasso_glm_regression <- function(xy=data.table(),x=c('',''),y='y',var_nums = 15,
   InformationValue::ks_stat(GLM$y,GLM$fitted.values) 
   InformationValue::ks_plot(GLM$y,GLM$fitted.values)
   InformationValue::plotROC(GLM$y,GLM$fitted.values)
-  # 测试集表现
+  # 测试集表�?
   y_fit_test <- predict(GLM,test_woe,type = 'response')
   InformationValue::ks_stat(test_woe$y,y_fit_test)
   
@@ -790,7 +792,7 @@ woe_score2sql_num <-
     pat = paste('(-Inf < ',woe_table$x_name %>% unique(),' and)|(and ',woe_table$x_name %>% unique(),' <= Inf)',sep='')
     woe_table$x %>% as.character() %>% {function(x) str_sub(x,2,nchar(x)-1)}() %>% 
       str_replace(',',woe_table$x_name %>% unique() %>% paste0(' < ',.,' and ',.," <=")) %>% 
-      str_replace(pat,"") %>% # 改模式 "(-Inf < )|( <= Inf)"
+      str_replace(pat,"") %>% # 改模�? "(-Inf < )|( <= Inf)"
       mapply(paste0,' when ', ., " then ", round(woe_table$woe_score,woe_precision)) %>% 
       paste0(collapse = ' \n') %>% 
       paste('/******',unique(woe_table$x_name),'******/\n',
